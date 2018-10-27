@@ -62,17 +62,18 @@ class _MasterHeadState extends State<MasterHead> {
   Widget build(BuildContext context) {
 
     Widget photoWithCaption = Container(
-      width: 340.0,
+      width: 370.0,
+      margin: EdgeInsets.all(10.0),
       child: Stack(
         fit: StackFit.loose,
         children: <Widget>[
           Center(
-            child: Image.network("https://udemy-images.udemy.com/course/480x270/1949472_451a_2.jpg", width: 340.0,),),
+            child: Image.network("https://udemy-images.udemy.com/course/480x270/1949472_451a_2.jpg", width: 370.0,),),
           Positioned(
             bottom: 0.0,
             child: Container(
               color: Colors.blueGrey.withOpacity(0.4),
-              width: 340.0,
+              width: 370.0,
               padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
               child: Text(
                 "The Ultimate Guide to Real World Applications with Unity", 
@@ -84,8 +85,8 @@ class _MasterHeadState extends State<MasterHead> {
       )
     ); 
 
-    
     return Card(
+      margin: EdgeInsets.all(14.0),
       child: Column(
         children: <Widget>[
           photoWithCaption
@@ -138,6 +139,7 @@ class _CourseInfoListItemState extends State<CourseInfoListItem> {
     }
 
     return Card(
+      margin: EdgeInsets.all(14.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget> [
