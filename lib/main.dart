@@ -37,14 +37,60 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: CourseInfoListItem()
+      body: ListView(
+        children: <Widget>[
+          MasterHead(),
+          CourseInfoListItem()
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: Icon(Icons.search),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class MasterHead extends StatefulWidget {
+  @override
+  _MasterHeadState createState() => new _MasterHeadState();
+}
+
+class _MasterHeadState extends State<MasterHead> {
+  @override
+  Widget build(BuildContext context) {
+
+    Widget photoWithCaption = Container(
+      width: 340.0,
+      child: Stack(
+        fit: StackFit.loose,
+        children: <Widget>[
+          Center(
+            child: Image.network("https://udemy-images.udemy.com/course/480x270/1949472_451a_2.jpg", width: 340.0,),),
+          Positioned(
+            bottom: 0.0,
+            child: Container(
+              color: Colors.blueGrey.withOpacity(0.4),
+              width: 340.0,
+              padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+              child: Text(
+                "The Ultimate Guide to Real World Applications with Unity", 
+                textAlign: TextAlign.left,
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+            ),
+          ),
+        ],
+      )
+    ); 
+
+    
+    return Card(
+      child: Column(
+        children: <Widget>[
+          photoWithCaption
+        ],
+      )
     );
   }
 }
@@ -66,9 +112,22 @@ class _CourseInfoListItemState extends State<CourseInfoListItem> {
       stars.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 6.0, 0.0)));
       stars.add(Text(rate.toString()));
       stars.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 6.0, 0.0)));
-      stars.add(Text( 
-        "(" + noOfRate.toString() + " ratings)", 
-        style: TextStyle(fontSize: 12.0),)
+      stars.add(
+        Text( 
+          "(" + noOfRate.toString() + " ratings)", 
+          style: TextStyle(fontSize: 12.0)
+        ),
+      );
+      stars.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 12.0, 0.0)));
+      stars.add(
+        Text(
+          "\$93.22", 
+          style: TextStyle(
+            decoration: TextDecoration.lineThrough,
+            fontWeight: FontWeight.bold,
+            fontSize: 16.0,
+          ),
+        )
       );
       return Container(
         width: 360.0,
