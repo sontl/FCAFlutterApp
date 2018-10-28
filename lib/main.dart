@@ -37,11 +37,18 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text("     List courses in", style: TextStyle(fontSize: 25.0, color: Colors.white,),),
+        elevation: 0.0,
+        centerTitle: false,
       ),
       body: ListView(
         children: <Widget>[
           MasterHead(),
+          Row(
+            children: <Widget>[
+              const Padding(padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0)),
+              Text("23 free courses in ALL CATEGORIES")
+          ],),
           CourseInfoListItem()
         ],
       ),
@@ -54,12 +61,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class MasterHead extends StatefulWidget {
+class FeaturedCourse extends StatefulWidget {
   @override
-  _MasterHeadState createState() => new _MasterHeadState();
+  _FeaturedCourseState createState() => new _FeaturedCourseState();
 }
 
-class _MasterHeadState extends State<MasterHead> {
+class _FeaturedCourseState extends State<FeaturedCourse> {
   @override
   Widget build(BuildContext context) {
     final cardWidth = MediaQuery.of(context).size.width * 0.9;
@@ -101,6 +108,44 @@ class _MasterHeadState extends State<MasterHead> {
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       )
+    );
+  }
+}
+
+class MasterHead extends StatefulWidget {
+  @override
+  _MasterHeadState createState() => new _MasterHeadState();
+}
+
+class _MasterHeadState extends State<MasterHead> {
+  @override
+  Widget build(BuildContext context) {
+    final deviceWidth = MediaQuery.of(context).size.width;
+    return Stack(
+      children: <Widget>[
+        Container(
+          width: deviceWidth,
+          height: 420.0,
+          color: Colors.transparent,
+        ),
+        Container(
+          width: deviceWidth,
+          height: 150.0,
+          padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0),
+          color: Colors.blue,
+        ),
+        Row(
+          children: <Widget>[
+            const Padding(padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0)),
+            const Text("ALL CATEGORIES", style: TextStyle(fontSize: 30.0, color: Colors.white, fontWeight: FontWeight.bold),),
+            const Icon(Icons.arrow_drop_down, color: Colors.white,)
+          ],
+        ), 
+        Positioned(
+          top: 50.0,
+          child: FeaturedCourse(),
+        )
+      ],
     );
   }
 }
@@ -172,6 +217,7 @@ class CourseInfoHightlight extends StatelessWidget {
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 16.0,
+          color: Colors.green
         ),
       )
     );
