@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(new MyApp());
 
+
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -11,7 +13,7 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Flutter Demo Home Page'),
+      home: new MyHomePage(title: 'Free Premium Udemy Courses'),
     );
   }
 }
@@ -20,7 +22,7 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
-
+  
   @override
   _MyHomePageState createState() => new _MyHomePageState();
 }
@@ -60,20 +62,20 @@ class MasterHead extends StatefulWidget {
 class _MasterHeadState extends State<MasterHead> {
   @override
   Widget build(BuildContext context) {
-
+    final cardWidth = MediaQuery.of(context).size.width * 0.9;
     Widget photoWithCaption = Container(
-      width: 370.0,
+      width: cardWidth,
       margin: EdgeInsets.all(10.0),
       child: Stack(
         fit: StackFit.loose,
         children: <Widget>[
           Center(
-            child: Image.network("https://udemy-images.udemy.com/course/480x270/1949472_451a_2.jpg", width: 370.0,),),
+            child: Image.network("https://udemy-images.udemy.com/course/480x270/1949472_451a_2.jpg", width: cardWidth,),),
           Positioned(
             bottom: 0.0,
             child: Container(
               color: Colors.blueGrey.withOpacity(0.4),
-              width: 370.0,
+              width: cardWidth,
               padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
               child: Text(
                 "The Ultimate Guide to Real World Applications with Unity", 
@@ -89,7 +91,14 @@ class _MasterHeadState extends State<MasterHead> {
       margin: EdgeInsets.all(14.0),
       child: Column(
         children: <Widget>[
-          photoWithCaption
+          photoWithCaption,
+          Container(
+            width: cardWidth,
+            padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+            child: Text("No MERN or MEAN… just Express. For those who’ve learned a bit about the most awesome node framework, and want more. | By Robert Bunch"),
+          ), 
+          CourseInfoHightlight(rating: 4.9, noOfRatings: 11234,),
+          Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       )
     );
@@ -104,40 +113,6 @@ class CourseInfoListItem extends StatefulWidget {
 class _CourseInfoListItemState extends State<CourseInfoListItem> {
   @override
   Widget build(BuildContext context) {
-
-    Widget buildRatingStar(double rate, int noOfRate) {
-      var stars = <Widget>[];
-      for (var i=0; i < rate; i++) {
-        stars.add(Icon(Icons.star, color: Colors.orange,));
-      }
-      stars.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 6.0, 0.0)));
-      stars.add(Text(rate.toString()));
-      stars.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 6.0, 0.0)));
-      stars.add(
-        Text( 
-          "(" + noOfRate.toString() + " ratings)", 
-          style: TextStyle(fontSize: 12.0)
-        ),
-      );
-      stars.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 12.0, 0.0)));
-      stars.add(
-        Text(
-          "\$93.22", 
-          style: TextStyle(
-            decoration: TextDecoration.lineThrough,
-            fontWeight: FontWeight.bold,
-            fontSize: 16.0,
-          ),
-        )
-      );
-      return Container(
-        width: 360.0,
-        child: Row(
-          children: stars,          
-        )
-      );
-    }
-
     return Card(
       margin: EdgeInsets.all(14.0),
       child: Column(
@@ -152,7 +127,7 @@ class _CourseInfoListItemState extends State<CourseInfoListItem> {
           ButtonTheme.bar( // make buttons use the appropriate styles for cards
             child: ButtonBar(
               children: <Widget>[
-                buildRatingStar(4.0, 13356),
+                CourseInfoHightlight(rating: 4.2, noOfRatings: 32124,)
               ],
             ),
           ),
@@ -160,4 +135,83 @@ class _CourseInfoListItemState extends State<CourseInfoListItem> {
       )
     );
   } 
+}
+
+class CourseInfoHightlight extends StatelessWidget {
+  final double rating;
+  final double price;
+  final int noOfRatings;
+
+  CourseInfoHightlight({ this.rating = .0, this.price=.0, this.noOfRatings=0});
+  
+  Widget build(BuildContext context) {
+    var info = <Widget>[];
+    info.add(StarRating(rating: rating, color: Colors.orangeAccent,));
+    info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 6.0, 0.0)));
+    info.add(Text(rating.toString()));
+    info.add(
+      Text( 
+        " (" + noOfRatings.toString() + " ratings)", 
+        style: TextStyle(fontSize: 12.0)
+      ),
+    );
+    info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 12.0, 0.0)));
+    info.add(
+      Text(
+        "\$93.22", 
+        style: TextStyle(
+          decoration: TextDecoration.lineThrough,
+          fontWeight: FontWeight.bold,
+          fontSize: 16.0,
+        ),
+      )
+    );
+    return Container(
+      width: 360.0,
+      child: Row(
+        children: info,          
+      )
+    );
+  }
+}
+
+typedef void RatingChangeCallback(double rating);
+
+class StarRating extends StatelessWidget {
+  final int starCount;
+  final double rating;
+  final RatingChangeCallback onRatingChanged;
+  final Color color;
+
+  StarRating({this.starCount = 5, this.rating = .0, this.onRatingChanged, this.color});
+
+  Widget buildStar(BuildContext context, int index) {
+    Icon icon;
+    if (index >= rating) {
+      icon = Icon(
+        Icons.star_border,
+        color: Theme.of(context).buttonColor,
+      );
+    }
+    else if (index > rating - 1 && index < rating) {
+      icon = Icon(
+        Icons.star_half,
+        color: color ?? Theme.of(context).primaryColor,
+      );
+    } else {
+      icon = Icon(
+        Icons.star,
+        color: color ?? Theme.of(context).primaryColor,
+      );
+    }
+    return InkResponse(
+      onTap: onRatingChanged == null ? null : () => onRatingChanged(index + 1.0),
+      child: icon,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(children: List.generate(starCount, (index) => buildStar(context, index)));
+  }
 }
