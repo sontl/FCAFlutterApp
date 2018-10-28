@@ -97,7 +97,7 @@ class _MasterHeadState extends State<MasterHead> {
             padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
             child: Text("No MERN or MEAN… just Express. For those who’ve learned a bit about the most awesome node framework, and want more. | By Robert Bunch"),
           ), 
-          CourseInfoHightlight(rating: 4.9, noOfRatings: 11234,),
+          CourseInfoHightlight(rating: 4.9, noOfRatings: 11234, price: 98.98,),
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       )
@@ -127,7 +127,7 @@ class _CourseInfoListItemState extends State<CourseInfoListItem> {
           ButtonTheme.bar( // make buttons use the appropriate styles for cards
             child: ButtonBar(
               children: <Widget>[
-                CourseInfoHightlight(rating: 4.2, noOfRatings: 32124,)
+                CourseInfoHightlight(rating: 4.2, noOfRatings: 32124, price: 212.99,)
               ],
             ),
           ),
@@ -158,9 +158,18 @@ class CourseInfoHightlight extends StatelessWidget {
     info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 12.0, 0.0)));
     info.add(
       Text(
-        "\$93.22", 
+        "\$" + price.toString(), 
         style: TextStyle(
           decoration: TextDecoration.lineThrough,
+          fontWeight: FontWeight.bold,
+          fontSize: 16.0,
+        ),
+      )
+    );
+    info.add(
+      Text(
+        " FREE", 
+        style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 16.0,
         ),
