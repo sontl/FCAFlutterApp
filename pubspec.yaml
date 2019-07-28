@@ -1,4 +1,4 @@
-name: mobile_app
+name: FreePremiumCourse
 description: A mobile app to provide information about waived courses in Udemy.
 
 # The following defines the version and build number for your application.
@@ -15,7 +15,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  http: ^0.12.0+2
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2

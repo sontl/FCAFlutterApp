@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:FreePremiumCourse/models/CourseDetail.dart';
 import 'package:flutter/material.dart';
+import 'package:FreePremiumCourse/models/CourseComponent.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(new MyApp());
 
@@ -62,6 +67,9 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class FeaturedCourse extends StatefulWidget {
+  final CourseDetail courseDetail;
+
+  FeaturedCourse({Key key, this.courseDetail}) : super(key:key);
   @override
   _FeaturedCourseState createState() => new _FeaturedCourseState();
 }
@@ -77,7 +85,7 @@ class _FeaturedCourseState extends State<FeaturedCourse> {
         fit: StackFit.loose,
         children: <Widget>[
           Center(
-            child: Image.network("https://udemy-images.udemy.com/course/480x270/1949472_451a_2.jpg", width: cardWidth,),),
+            child: Image.network(widget.courseDetail.img480x270Url, width: cardWidth,),),
           Positioned(
             bottom: 0.0,
             child: Container(
@@ -85,7 +93,7 @@ class _FeaturedCourseState extends State<FeaturedCourse> {
               width: cardWidth,
               padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
               child: Text(
-                "The Ultimate Guide to Real World Applications with Unity", 
+                widget.courseDetail.title, 
                 textAlign: TextAlign.left,
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
             ),
@@ -102,9 +110,12 @@ class _FeaturedCourseState extends State<FeaturedCourse> {
           Container(
             width: cardWidth,
             padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-            child: Text("No MERN or MEAN… just Express. For those who’ve learned a bit about the most awesome node framework, and want more. | By Robert Bunch"),
+            child: Text(widget.courseDetail.headline),
           ), 
-          CourseInfoHightlight(rating: 4.9, noOfRatings: 11234, price: 98.98,),
+          CourseInfoHightlight(
+            rating: widget.courseDetail.avgRating, 
+            noOfRatings: widget.courseDetail.numReviews, 
+            price: widget.courseDetail.listingPrice,),
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       )
@@ -143,14 +154,55 @@ class _MasterHeadState extends State<MasterHead> {
         ), 
         Positioned(
           top: 50.0,
-          child: FeaturedCourse(),
+          child: 
+            FutureBuilder<CourseDetail>(
+              future: fetchCourseDetails(http.Client()),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) print(snapshot.error);
+
+                return snapshot.hasData
+                    ? FeaturedCourse(courseDetail: snapshot.data)
+                    : Center(child: CircularProgressIndicator());
+              },
+            ),
+            //FeaturedCourse(),
         )
       ],
     );
   }
 }
 
+Future<CourseComponent> fetchPost(http.Client client) async {
+  final response =
+      await client.get('https://o2lw3pohuj.execute-api.ap-southeast-1.amazonaws.com/test/courses/1096864');
+
+  if (response.statusCode == 200) {
+    // If server returns an OK response, parse the JSON.
+    return CourseComponent.fromJson(json.decode(response.body)[0]);
+  } else {
+    // If that response was not OK, throw an error.
+    throw Exception('Failed to load post');
+  }
+} 
+
+Future<CourseDetail> fetchCourseDetails(http.Client client) async {
+  final response =
+      await client.get('https://www.udemy.com/api-2.0/courses/1096864?fields[course]=title,is_paid,image_480x270,num_reviews,price,context_info,primary_category,primary_subcategory,avg_rating_recent,visible_instructors,locale,estimated_content_length,num_subscribers,headline,description');
+
+  if (response.statusCode == 200) {
+    // If server returns an OK response, parse the JSON.
+    return CourseDetail.fromJson(json.decode(response.body));
+  } else {
+    // If that response was not OK, throw an error.
+    throw Exception('Failed to load post');
+  }
+} 
+
 class CourseInfoListItem extends StatefulWidget {
+  final List<CourseComponent> courseComponents;
+
+  CourseInfoListItem({Key key, this.courseComponents}) : super(key:key);
+  
   @override
   _CourseInfoListItemState createState() => new _CourseInfoListItemState();
 }
@@ -172,22 +224,24 @@ class _CourseInfoListItemState extends State<CourseInfoListItem> {
           ButtonTheme.bar( // make buttons use the appropriate styles for cards
             child: ButtonBar(
               children: <Widget>[
-                CourseInfoHightlight(rating: 4.2, noOfRatings: 32124, price: 212.99,)
+                CourseInfoHightlight(rating: 4.2, noOfRatings: 32124, price: "\$212.99",)
               ],
             ),
           ),
         ]
       )
     );
-  } 
+  }
+
+  
 }
 
 class CourseInfoHightlight extends StatelessWidget {
   final double rating;
-  final double price;
+  final String price;
   final int noOfRatings;
 
-  CourseInfoHightlight({ this.rating = .0, this.price=.0, this.noOfRatings=0});
+  CourseInfoHightlight({ this.rating = .0, this.price, this.noOfRatings=0});
   
   Widget build(BuildContext context) {
     var info = <Widget>[];
@@ -203,7 +257,7 @@ class CourseInfoHightlight extends StatelessWidget {
     info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 12.0, 0.0)));
     info.add(
       Text(
-        "\$" + price.toString(), 
+        price, 
         style: TextStyle(
           decoration: TextDecoration.lineThrough,
           fontWeight: FontWeight.bold,
