@@ -18,15 +18,26 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Free Premium Udemy Courses'),
+      home: 
+        FutureBuilder<List>(
+              future: fetchListCourseDetails(http.Client()),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) print(snapshot.error);
+
+                return snapshot.hasData
+                    ? MyHomePage(title: 'Free Premium Udemy Courses', courses: snapshot.data)
+                    : Center(child: CircularProgressIndicator());
+              },
+            ),
+     // new MyHomePage(title: 'Free Premium Udemy Courses'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
+  final List<CourseDetail> courses;
   final String title;
+  MyHomePage({Key key, this.title, this.courses}) : super(key: key);
   
   @override
   _MyHomePageState createState() => new _MyHomePageState();
@@ -40,6 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var totalFreeCourses = widget.courses.length.toString();
     return Scaffold(
       appBar: AppBar(
         title: Text("     List courses in", style: TextStyle(fontSize: 25.0, color: Colors.white,),),
@@ -48,13 +60,15 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ListView(
         children: <Widget>[
-          MasterHead(),
+          MasterHead(courseDetail: widget.courses[0],),
           Row(
             children: <Widget>[
               const Padding(padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0)),
-              Text("23 free courses in ALL CATEGORIES")
+              Text(totalFreeCourses + " free courses in ALL CATEGORIES")
           ],),
-          CourseInfoListItem()
+          //Row(children: widget.courses.map((item) => new CourseInfoListItem(courseDetail: item)).toList()),
+          for(var item in widget.courses ) CourseInfoListItem(courseDetail: item)
+          //CourseInfoListItem()
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -124,6 +138,8 @@ class _FeaturedCourseState extends State<FeaturedCourse> {
 }
 
 class MasterHead extends StatefulWidget {
+  final CourseDetail courseDetail;
+  MasterHead({Key key, this.courseDetail}) : super(key:key);
   @override
   _MasterHeadState createState() => new _MasterHeadState();
 }
@@ -155,53 +171,17 @@ class _MasterHeadState extends State<MasterHead> {
         Positioned(
           top: 50.0,
           child: 
-            FutureBuilder<CourseDetail>(
-              future: fetchCourseDetails(http.Client()),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) print(snapshot.error);
-
-                return snapshot.hasData
-                    ? FeaturedCourse(courseDetail: snapshot.data)
-                    : Center(child: CircularProgressIndicator());
-              },
-            ),
-            //FeaturedCourse(),
+            FeaturedCourse(courseDetail: widget.courseDetail,),
         )
       ],
     );
   }
 }
 
-Future<CourseComponent> fetchPost(http.Client client) async {
-  final response =
-      await client.get('https://o2lw3pohuj.execute-api.ap-southeast-1.amazonaws.com/test/courses/1096864');
-
-  if (response.statusCode == 200) {
-    // If server returns an OK response, parse the JSON.
-    return CourseComponent.fromJson(json.decode(response.body)[0]);
-  } else {
-    // If that response was not OK, throw an error.
-    throw Exception('Failed to load post');
-  }
-} 
-
-Future<CourseDetail> fetchCourseDetails(http.Client client) async {
-  final response =
-      await client.get('https://www.udemy.com/api-2.0/courses/1096864?fields[course]=title,is_paid,image_480x270,num_reviews,price,context_info,primary_category,primary_subcategory,avg_rating_recent,visible_instructors,locale,estimated_content_length,num_subscribers,headline,description');
-
-  if (response.statusCode == 200) {
-    // If server returns an OK response, parse the JSON.
-    return CourseDetail.fromJson(json.decode(response.body));
-  } else {
-    // If that response was not OK, throw an error.
-    throw Exception('Failed to load post');
-  }
-} 
-
 class CourseInfoListItem extends StatefulWidget {
-  final List<CourseComponent> courseComponents;
+  final CourseDetail courseDetail;
 
-  CourseInfoListItem({Key key, this.courseComponents}) : super(key:key);
+  CourseInfoListItem({Key key, this.courseDetail}) : super(key:key);
   
   @override
   _CourseInfoListItemState createState() => new _CourseInfoListItemState();
@@ -213,27 +193,26 @@ class _CourseInfoListItemState extends State<CourseInfoListItem> {
     return Card(
       margin: EdgeInsets.all(14.0),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        //mainAxisSize: MainAxisSize.max,
         children: <Widget> [
           ListTile(
-            title: Text('The web developer bootcamp'),
-            subtitle: Text('The only course you need to learn web development - HTML, CSS, JS, Node, and More!'),
+            title: Text(widget.courseDetail.title),
+            subtitle: Text(widget.courseDetail.headline),
             leading: Image.network(
-              "https://udemy-images.udemy.com/course/480x270/1326292_4dcf.jpg", width: 90.0,),
+              widget.courseDetail.img480x270Url, width: 90.0,),
           ),
-          ButtonTheme.bar( // make buttons use the appropriate styles for cards
-            child: ButtonBar(
+          Row (
               children: <Widget>[
-                CourseInfoHightlight(rating: 4.2, noOfRatings: 32124, price: "\$212.99",)
+                CourseInfoHightlight(
+                  rating: widget.courseDetail.avgRating, 
+                  noOfRatings: widget.courseDetail.numReviews,
+                  price: widget.courseDetail.listingPrice,)
               ],
             ),
-          ),
         ]
       )
     );
   }
-
-  
 }
 
 class CourseInfoHightlight extends StatelessWidget {
@@ -245,7 +224,10 @@ class CourseInfoHightlight extends StatelessWidget {
   
   Widget build(BuildContext context) {
     var info = <Widget>[];
-    info.add(StarRating(rating: rating, color: Colors.orangeAccent,));
+    info.add(Align(
+      alignment: Alignment.bottomLeft,
+      child: StarRating(rating: rating, color: Colors.orangeAccent,))
+    );
     info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 6.0, 0.0)));
     info.add(Text(rating.toString()));
     info.add(
@@ -276,11 +258,36 @@ class CourseInfoHightlight extends StatelessWidget {
       )
     );
     return Container(
-      width: 360.0,
+      width: MediaQuery.of(context).size.width - 30,
       child: Row(
         children: info,          
       )
     );
+  }
+}
+
+
+Future<CourseDetail> fetchCourseDetails(http.Client client, courseId) async {
+  final response =
+      await client.get('https://www.udemy.com/api-2.0/courses/' + courseId 
+        + '?fields[course]=title,is_paid,image_480x270,num_reviews,price,context_info,primary_category,primary_subcategory,avg_rating_recent,visible_instructors,locale,estimated_content_length,num_subscribers,headline,description');
+
+  if (response.statusCode == 200) {
+    // If server returns an OK response, parse the JSON.
+    return CourseDetail.fromJson(json.decode(response.body));
+  } else {
+    // If that response was not OK, throw an error.
+    throw Exception('Failed to load post');
+  }
+}
+
+Future<List<CourseDetail>> fetchListCourseDetails(http.Client client) async {
+  final response = await client.get("https://o2lw3pohuj.execute-api.ap-southeast-1.amazonaws.com/test/courses?status=VALID&with_details=true");
+  if (response.statusCode == 200) {
+    var coursesJson = json.decode(response.body) as List;
+    List<CourseDetail> displayedCourses = coursesJson != null 
+                                        ? coursesJson.map((i)=>CourseDetail.fromJson(i["course_details"][0])).toList() : null;
+    return displayedCourses;
   }
 }
 
@@ -300,17 +307,20 @@ class StarRating extends StatelessWidget {
       icon = Icon(
         Icons.star_border,
         color: Theme.of(context).buttonColor,
+        size: 20,
       );
     }
     else if (index > rating - 1 && index < rating) {
       icon = Icon(
         Icons.star_half,
         color: color ?? Theme.of(context).primaryColor,
+        size: 20,
       );
     } else {
       icon = Icon(
         Icons.star,
         color: color ?? Theme.of(context).primaryColor,
+        size: 20,
       );
     }
     return InkResponse(
