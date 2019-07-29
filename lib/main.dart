@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:FreePremiumCourse/models/CourseDetail.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:FreePremiumCourse/models/Globals.dart' as globals;
 
-void main() => runApp(new MyApp());
+void main() {
+  runApp(new MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -20,9 +23,9 @@ class MyApp extends StatelessWidget {
           future: fetchListCourseDetails(http.Client()),
           builder: (context, snapshot) {
             if (snapshot.hasError) print(snapshot.error);
-
+            globals.courses = snapshot.data;
             return snapshot.hasData
-                ? MyHomePage(title: 'Free Premium Udemy Courses', courses: snapshot.data)
+                ? MyHomePage(title: 'Free Premium Udemy Courses', courses: globals.courses )
                 : Center(child: CircularProgressIndicator());
           },
         ),
@@ -94,6 +97,12 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future<Widget> buildCourseDetailPageAsync(item) async {
+    return Future.microtask(() {
+        return CourseDetailPage(item);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var totalFreeCourses = widget.courses.length.toString();
@@ -128,7 +137,19 @@ class _MyHomePageState extends State<MyHomePage> {
               Text(totalFreeCourses + " free courses in ALL CATEGORIES")
           ],),
           //Row(children: widget.courses.map((item) => new CourseInfoListItem(courseDetail: item)).toList()),
-          for(var item in widget.courses ) CourseInfoListItem(courseDetail: item)
+          for(var item in widget.courses) 
+            GestureDetector(
+              onTap: () async{
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => CourseDetailPage(item)),
+                // );
+                var page = await buildCourseDetailPageAsync(item);
+                var route = MaterialPageRoute(builder: (_) => page);
+                Navigator.push(context, route);
+              },  
+              child: CourseInfoListItem(courseDetail: item)
+              )
           //CourseInfoListItem()
         ],
       ), 
@@ -186,7 +207,8 @@ class FeaturedCourse extends StatelessWidget {
           CourseInfoHightlight(
             rating: courseDetail.avgRating, 
             noOfRatings: courseDetail.numReviews, 
-            price: courseDetail.listingPrice,),
+            price: courseDetail.listingPrice,
+            noOfStudent: courseDetail.numStudents,),
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       )
@@ -240,17 +262,21 @@ class CourseInfoListItem extends StatelessWidget {
               courseDetail.img480x270Url, width: 90.0,),
           ),
           Row (
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                CourseInfoHightlight(
-                  rating: courseDetail.avgRating, 
-                  noOfRatings: courseDetail.numReviews,
-                  price: courseDetail.listingPrice,)
-              ],
-            ),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              CourseInfoHightlight(
+                rating: courseDetail.avgRating, 
+                noOfRatings: courseDetail.numReviews,
+                price: courseDetail.listingPrice,
+                noOfStudent: courseDetail.numStudents,
+              ),
+            ],
+          ),
+          
         ]
-      )
+      ),
     );
+    
   }
 }
 
@@ -258,8 +284,9 @@ class CourseInfoHightlight extends StatelessWidget {
   final double rating;
   final String price;
   final int noOfRatings;
+  final int noOfStudent;
 
-  CourseInfoHightlight({ this.rating = .0, this.price, this.noOfRatings=0});
+  CourseInfoHightlight({ this.rating = .0, this.price, this.noOfRatings=0, this.noOfStudent=0});
   
   Widget build(BuildContext context) {
     var info = <Widget>[];
@@ -268,10 +295,17 @@ class CourseInfoHightlight extends StatelessWidget {
       child: StarRating(rating: rating, color: Colors.orangeAccent,))
     );
     info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 6.0, 0.0)));
-    info.add(Text(rating.toString()));
+    info.add(Text(rating.toString(), 
+        style: TextStyle(fontSize: 12.0)));
     info.add(
       Text( 
         " (" + noOfRatings.toString() + " ratings)", 
+        style: TextStyle(fontSize: 12.0)
+      ),
+    );
+    info.add(
+      Text( 
+        "  " + noOfStudent.toString() + " students", 
         style: TextStyle(fontSize: 12.0)
       ),
     );
@@ -304,7 +338,6 @@ class CourseInfoHightlight extends StatelessWidget {
     );
   }
 }
-
 
 Future<CourseDetail> fetchCourseDetails(http.Client client, courseId) async {
   final response =
@@ -347,20 +380,20 @@ class StarRating extends StatelessWidget {
       icon = Icon(
         Icons.star_border,
         color: Theme.of(context).buttonColor,
-        size: 20,
+        size: 14,
       );
     }
     else if (index > rating - 1 && index < rating) {
       icon = Icon(
         Icons.star_half,
         color: color ?? Theme.of(context).primaryColor,
-        size: 20,
+        size: 14,
       );
     } else {
       icon = Icon(
         Icons.star,
         color: color ?? Theme.of(context).primaryColor,
-        size: 20,
+        size: 14,
       );
     }
     return InkResponse(
@@ -372,5 +405,122 @@ class StarRating extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(children: List.generate(starCount, (index) => buildStar(context, index)));
+  }
+}
+
+class CourseDetailPage extends StatelessWidget {
+  final CourseDetail courseDetail;
+
+  CourseDetailPage(this.courseDetail);
+
+  @override
+  Widget build(BuildContext context) {
+      return ListView(
+        children: <Widget>[
+          MasterHead2(courseDetail: courseDetail,),
+          Row(
+            children: <Widget>[
+              Text(
+                "Created By " + courseDetail.instructors[0].displayName, 
+                textAlign: TextAlign.left,
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.0),
+              ),
+            ],
+          )
+        ],
+      );
+  }
+}
+
+class MasterHead2 extends StatelessWidget {
+  final CourseDetail courseDetail;
+  MasterHead2({Key key, this.courseDetail}) : super(key:key);
+  @override
+  Widget build(BuildContext context) {
+    return FeaturedCourse2(courseDetail: courseDetail,);
+  }
+}
+
+class FeaturedCourse2 extends StatelessWidget {
+  final CourseDetail courseDetail;
+  
+  FeaturedCourse2({Key key, this.courseDetail}) : super(key:key);
+  
+  @override
+  Widget build(BuildContext context) {
+    final deviceWidth = MediaQuery.of(context).size.width;
+    Widget photoWithCaption = Container(
+      child: Stack(
+        fit: StackFit.loose,
+        children: <Widget>[
+          Center(
+            child: Image.network(courseDetail.img480x270Url,),),
+          Positioned(
+            bottom: 0.0,
+            width: deviceWidth,
+            child: Container(
+              color: Colors.blueGrey.withOpacity(0.6),
+              padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+              child: Text(
+                courseDetail.title, 
+                textAlign: TextAlign.left,
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+            ),
+          ),
+          Positioned(
+            top: 16.0,
+            left: 16.0,
+            child: BackButton()  
+          ,)
+        ],
+      )
+    ); 
+
+    return Card(
+      child: Column(
+        children: <Widget>[
+          photoWithCaption,
+          Container(
+            padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+            child: Text(courseDetail.headline),
+          ), 
+          CourseInfoHightlight(
+            rating: courseDetail.avgRating, 
+            noOfRatings: courseDetail.numReviews, 
+            price: courseDetail.listingPrice,
+            noOfStudent: courseDetail.numStudents,),
+          Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
+        ],
+      )
+    );
+  }
+}
+
+class BackButton extends StatelessWidget {
+  Future<Widget> buildHomePageAsync() async {
+    return Future.microtask(() {
+        return MyHomePage(title: 'Free Premium Udemy Courses', courses: globals.courses );
+    });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      // When the child is tapped, show a snackbar.
+      onTap: () {
+        Navigator.pop(context);
+      },
+      // The custom button
+      child: Container(
+          color: Colors.blueGrey.withOpacity(0.3),
+          padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+          child: Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+            size: 30,
+        ),
+      ),
+    );
   }
 }
