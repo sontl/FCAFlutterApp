@@ -2,33 +2,30 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:FreePremiumCourse/models/CourseDetail.dart';
 import 'package:flutter/material.dart';
-import 'package:FreePremiumCourse/models/CourseComponent.dart';
 import 'package:http/http.dart' as http;
 
 void main() => runApp(new MyApp());
-
-
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Free Premium Udemy Courses',
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: 
         FutureBuilder<List>(
-              future: fetchListCourseDetails(http.Client()),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) print(snapshot.error);
+          future: fetchListCourseDetails(http.Client()),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) print(snapshot.error);
 
-                return snapshot.hasData
-                    ? MyHomePage(title: 'Free Premium Udemy Courses', courses: snapshot.data)
-                    : Center(child: CircularProgressIndicator());
-              },
-            ),
+            return snapshot.hasData
+                ? MyHomePage(title: 'Free Premium Udemy Courses', courses: snapshot.data)
+                : Center(child: CircularProgressIndicator());
+          },
+        ),
      // new MyHomePage(title: 'Free Premium Udemy Courses'),
     );
   }
@@ -43,20 +40,84 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
+class Choice {
+  const Choice({this.title, this.icon});
+
+  final String title;
+  final IconData icon;
+}
+
+const List<Choice> choices = const <Choice>[
+  const Choice(title: 'Car', icon: Icons.directions_car),
+  const Choice(title: 'Bicycle', icon: Icons.directions_bike),
+  const Choice(title: 'Boat', icon: Icons.directions_boat),
+  const Choice(title: 'Bus', icon: Icons.directions_bus),
+  const Choice(title: 'Train', icon: Icons.directions_railway),
+  const Choice(title: 'Walk', icon: Icons.directions_walk),
+];
+
+class ChoiceCard extends StatelessWidget {
+  const ChoiceCard({Key key, this.choice}) : super(key: key);
+
+  final Choice choice;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle textStyle = Theme.of(context).textTheme.display1;
+    return Card(
+      color: Colors.white,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Icon(choice.icon, size: 128.0, color: textStyle.color),
+            Text(choice.title, style: textStyle),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   void _incrementCounter() {
     setState(() {
+    });
+  }
+  Choice _selectedChoice = choices[0]; 
+
+  void _select(Choice choice) {
+    // Causes the app to rebuild with the new _selectedChoice.
+    setState(() {
+      _selectedChoice = choice;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     var totalFreeCourses = widget.courses.length.toString();
+    
     return Scaffold(
       appBar: AppBar(
-        title: Text("     List courses in", style: TextStyle(fontSize: 25.0, color: Colors.white,),),
+        title: Text("ALL CATEGORIES", style: TextStyle(fontSize: 25.0, color: Colors.white,),),
         elevation: 0.0,
         centerTitle: false,
+        actions: <Widget>[
+          // overflow menu
+          PopupMenuButton<Choice>(
+            onSelected: _select,
+            icon: Icon(Icons.category),
+            itemBuilder: (BuildContext context) {
+              return choices.skip(2).map((Choice choice) {
+                return PopupMenuItem<Choice>(
+                  value: choice,
+                  child: Text(choice.title),
+                );
+              }).toList();
+            },
+          ),
+        ],
       ),
       body: ListView(
         children: <Widget>[
@@ -70,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
           for(var item in widget.courses ) CourseInfoListItem(courseDetail: item)
           //CourseInfoListItem()
         ],
-      ),
+      ), 
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
@@ -80,15 +141,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class FeaturedCourse extends StatefulWidget {
+class FeaturedCourse extends StatelessWidget {
   final CourseDetail courseDetail;
 
   FeaturedCourse({Key key, this.courseDetail}) : super(key:key);
-  @override
-  _FeaturedCourseState createState() => new _FeaturedCourseState();
-}
-
-class _FeaturedCourseState extends State<FeaturedCourse> {
+  
   @override
   Widget build(BuildContext context) {
     final cardWidth = MediaQuery.of(context).size.width * 0.9;
@@ -99,7 +156,7 @@ class _FeaturedCourseState extends State<FeaturedCourse> {
         fit: StackFit.loose,
         children: <Widget>[
           Center(
-            child: Image.network(widget.courseDetail.img480x270Url, width: cardWidth,),),
+            child: Image.network(courseDetail.img480x270Url, width: cardWidth,),),
           Positioned(
             bottom: 0.0,
             child: Container(
@@ -107,7 +164,7 @@ class _FeaturedCourseState extends State<FeaturedCourse> {
               width: cardWidth,
               padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
               child: Text(
-                widget.courseDetail.title, 
+                courseDetail.title, 
                 textAlign: TextAlign.left,
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
             ),
@@ -124,12 +181,12 @@ class _FeaturedCourseState extends State<FeaturedCourse> {
           Container(
             width: cardWidth,
             padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-            child: Text(widget.courseDetail.headline),
+            child: Text(courseDetail.headline),
           ), 
           CourseInfoHightlight(
-            rating: widget.courseDetail.avgRating, 
-            noOfRatings: widget.courseDetail.numReviews, 
-            price: widget.courseDetail.listingPrice,),
+            rating: courseDetail.avgRating, 
+            noOfRatings: courseDetail.numReviews, 
+            price: courseDetail.listingPrice,),
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       )
@@ -137,14 +194,9 @@ class _FeaturedCourseState extends State<FeaturedCourse> {
   }
 }
 
-class MasterHead extends StatefulWidget {
+class MasterHead extends StatelessWidget {
   final CourseDetail courseDetail;
   MasterHead({Key key, this.courseDetail}) : super(key:key);
-  @override
-  _MasterHeadState createState() => new _MasterHeadState();
-}
-
-class _MasterHeadState extends State<MasterHead> {
   @override
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
@@ -152,61 +204,48 @@ class _MasterHeadState extends State<MasterHead> {
       children: <Widget>[
         Container(
           width: deviceWidth,
-          height: 420.0,
+          height: 310.0,
           color: Colors.transparent,
         ),
         Container(
           width: deviceWidth,
-          height: 150.0,
+          height: 100.0,
           padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0),
           color: Colors.blue,
         ),
-        Row(
-          children: <Widget>[
-            const Padding(padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0)),
-            const Text("ALL CATEGORIES", style: TextStyle(fontSize: 30.0, color: Colors.white, fontWeight: FontWeight.bold),),
-            const Icon(Icons.arrow_drop_down, color: Colors.white,)
-          ],
-        ), 
         Positioned(
-          top: 50.0,
           child: 
-            FeaturedCourse(courseDetail: widget.courseDetail,),
+            FeaturedCourse(courseDetail: courseDetail,),
         )
       ],
     );
   }
 }
-
-class CourseInfoListItem extends StatefulWidget {
+class CourseInfoListItem extends StatelessWidget {
   final CourseDetail courseDetail;
 
   CourseInfoListItem({Key key, this.courseDetail}) : super(key:key);
   
   @override
-  _CourseInfoListItemState createState() => new _CourseInfoListItemState();
-}
-
-class _CourseInfoListItemState extends State<CourseInfoListItem> {
-  @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(14.0),
+      margin: EdgeInsets.all(8.0),
       child: Column(
         //mainAxisSize: MainAxisSize.max,
         children: <Widget> [
           ListTile(
-            title: Text(widget.courseDetail.title),
-            subtitle: Text(widget.courseDetail.headline),
+            title: Text(courseDetail.title),
+            subtitle: Text(courseDetail.headline),
             leading: Image.network(
-              widget.courseDetail.img480x270Url, width: 90.0,),
+              courseDetail.img480x270Url, width: 90.0,),
           ),
           Row (
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 CourseInfoHightlight(
-                  rating: widget.courseDetail.avgRating, 
-                  noOfRatings: widget.courseDetail.numReviews,
-                  price: widget.courseDetail.listingPrice,)
+                  rating: courseDetail.avgRating, 
+                  noOfRatings: courseDetail.numReviews,
+                  price: courseDetail.listingPrice,)
               ],
             ),
         ]
@@ -258,7 +297,7 @@ class CourseInfoHightlight extends StatelessWidget {
       )
     );
     return Container(
-      width: MediaQuery.of(context).size.width - 30,
+      width: MediaQuery.of(context).size.width - 20,
       child: Row(
         children: info,          
       )
@@ -282,13 +321,14 @@ Future<CourseDetail> fetchCourseDetails(http.Client client, courseId) async {
 }
 
 Future<List<CourseDetail>> fetchListCourseDetails(http.Client client) async {
+  List<CourseDetail> displayedCourses;
   final response = await client.get("https://o2lw3pohuj.execute-api.ap-southeast-1.amazonaws.com/test/courses?status=VALID&with_details=true");
   if (response.statusCode == 200) {
     var coursesJson = json.decode(response.body) as List;
-    List<CourseDetail> displayedCourses = coursesJson != null 
+    displayedCourses = coursesJson != null 
                                         ? coursesJson.map((i)=>CourseDetail.fromJson(i["course_details"][0])).toList() : null;
-    return displayedCourses;
   }
+  return displayedCourses;
 }
 
 typedef void RatingChangeCallback(double rating);
