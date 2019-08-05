@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:FreePremiumCourse/models/CourseDetail.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:FreePremiumCourse/models/Globals.dart' as globals;
@@ -238,6 +239,25 @@ class MasterHead extends StatelessWidget {
         Positioned(
           child: 
             FeaturedCourse(courseDetail: courseDetail,),
+        ),
+        Positioned(
+          child: Row(children: <Widget> [
+            Text(
+              courseDetail.listingPrice, 
+              style: TextStyle(
+                decoration: TextDecoration.lineThrough,
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
+                color: Colors.blue,
+              ),
+            ),
+            Text(
+              "FREE", 
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color:Colors.green),
+            )],
+          ), 
+          left: 40.0,
+          top: 40.0,
         )
       ],
     );
@@ -259,7 +279,7 @@ class CourseInfoListItem extends StatelessWidget {
             title: Text(courseDetail.title),
             subtitle: Text(courseDetail.headline),
             leading: Image.network(
-              courseDetail.img480x270Url, width: 90.0,),
+              courseDetail.img96x54Url, width: 90.0,),
           ),
           Row (
             mainAxisAlignment: MainAxisAlignment.center,
@@ -316,7 +336,7 @@ class CourseInfoHightlight extends StatelessWidget {
         style: TextStyle(
           decoration: TextDecoration.lineThrough,
           fontWeight: FontWeight.bold,
-          fontSize: 16.0,
+          fontSize: 14.0,
         ),
       )
     );
@@ -325,7 +345,7 @@ class CourseInfoHightlight extends StatelessWidget {
         " FREE", 
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 16.0,
+          fontSize: 15.0,
           color: Colors.green
         ),
       )
@@ -353,16 +373,19 @@ Future<CourseDetail> fetchCourseDetails(http.Client client, courseId) async {
   }
 }
 
+
 Future<List<CourseDetail>> fetchListCourseDetails(http.Client client) async {
-  List<CourseDetail> displayedCourses;
-  final response = await client.get("https://o2lw3pohuj.execute-api.ap-southeast-1.amazonaws.com/test/courses?status=VALID&with_details=true");
+  final response = await client.get("https://o2lw3pohuj.execute-api.ap-southeast-1.amazonaws.com/test/courses?status=VALID");
   if (response.statusCode == 200) {
-    var coursesJson = json.decode(response.body) as List;
-    displayedCourses = coursesJson != null 
-                                        ? coursesJson.map((i)=>CourseDetail.fromJson(i["course_details"][0])).toList() : null;
+    return compute(parseListCourseDetails, response.body);
   }
-  return displayedCourses;
+  return null;
 }
+
+List<CourseDetail> parseListCourseDetails(String responseBody) {
+  var coursesJson = json.decode(responseBody) as List;
+  return coursesJson != null ? coursesJson.map((i)=>CourseDetail.fromJson(i["details"])).toList() : null;
+} 
 
 typedef void RatingChangeCallback(double rating);
 
@@ -410,7 +433,6 @@ class StarRating extends StatelessWidget {
 
 class CourseDetailPage extends StatelessWidget {
   final CourseDetail courseDetail;
-
   CourseDetailPage(this.courseDetail);
 
   @override
@@ -423,6 +445,11 @@ class CourseDetailPage extends StatelessWidget {
               Text(
                 "Created By " + courseDetail.instructors[0].displayName, 
                 textAlign: TextAlign.left,
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.0),
+              ),
+              Text(
+                "Created By " + courseDetail.instructors[0].displayName, 
+                textAlign: TextAlign.right,
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.0),
               ),
             ],
@@ -468,8 +495,8 @@ class FeaturedCourse2 extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 16.0,
-            left: 16.0,
+            top: 12.0,
+            left: 12.0,
             child: BackButton()  
           ,)
         ],
@@ -502,7 +529,6 @@ class BackButton extends StatelessWidget {
         return MyHomePage(title: 'Free Premium Udemy Courses', courses: globals.courses );
     });
   }
-
 
   @override
   Widget build(BuildContext context) {

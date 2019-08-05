@@ -10,13 +10,15 @@ class CourseDetail {
   double avgRating;
   String listingPrice;
   String img480x270Url;
+  String img96x54Url;
+  String img48x27Url;
   int numReviews;
   int numStudents;
   List<Instructor> instructors;
 
   CourseDetail({
-    this.id, this.title, this.isPaid, this.description, this.headline, 
-    this.avgRating, this.listingPrice, this.img480x270Url, this.numReviews, this.numStudents, this.instructors
+    this.id, this.title, this.isPaid, this.description, this.headline, this.avgRating, this.listingPrice,
+    this.img480x270Url, this.img96x54Url, this.img48x27Url, this.numReviews, this.numStudents, this.instructors
   });
 
   factory CourseDetail.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,8 @@ class CourseDetail {
       avgRating: avgRating as double,
       listingPrice: json['price'],
       img480x270Url: json['image_480x270'],
+      img96x54Url: json['image_96x54'],
+      img48x27Url: json['image_48x27'],
       numReviews: json['num_reviews'] as int,
       numStudents: json['num_subscribers'] as int,
       instructors: instructors
