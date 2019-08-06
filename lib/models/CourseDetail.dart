@@ -12,13 +12,17 @@ class CourseDetail {
   String img480x270Url;
   String img96x54Url;
   String img48x27Url;
+  String created;
+  String statusLabel;
+
   int numReviews;
   int numStudents;
   List<Instructor> instructors;
 
   CourseDetail({
     this.id, this.title, this.isPaid, this.description, this.headline, this.avgRating, this.listingPrice,
-    this.img480x270Url, this.img96x54Url, this.img48x27Url, this.numReviews, this.numStudents, this.instructors
+    this.img480x270Url, this.img96x54Url, this.img48x27Url, this.numReviews, this.numStudents, this.instructors,
+    this.created, this.statusLabel
   });
 
   factory CourseDetail.fromJson(Map<String, dynamic> json) {
@@ -39,7 +43,9 @@ class CourseDetail {
       img48x27Url: json['image_48x27'],
       numReviews: json['num_reviews'] as int,
       numStudents: json['num_subscribers'] as int,
-      instructors: instructors
+      instructors: instructors,
+      created: json['created'],
+      statusLabel: json['status_label']
     );
   }
 }

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:FreePremiumCourse/AppAds.dart';
 import 'package:FreePremiumCourse/models/CourseDetail.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
 import 'package:FreePremiumCourse/models/Globals.dart' as globals;
 
@@ -85,6 +87,20 @@ class ChoiceCard extends StatelessWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  @override
+  void initState() {
+    super.initState();
+    AppAds.init();
+    AppAds.showBanner(state: this);
+  }
+
+  @override
+  void dispose() {
+    AppAds.dispose();
+    super.dispose();
+  }
+
   void _incrementCounter() {
     setState(() {
     });
@@ -188,7 +204,7 @@ class FeaturedCourse extends StatelessWidget {
               child: Text(
                 courseDetail.title, 
                 textAlign: TextAlign.left,
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16.0),),
             ),
           ),
         ],
@@ -247,17 +263,17 @@ class MasterHead extends StatelessWidget {
               style: TextStyle(
                 decoration: TextDecoration.lineThrough,
                 fontWeight: FontWeight.bold,
-                fontSize: 18.0,
+                fontSize: 16.0,
                 color: Colors.blue,
               ),
             ),
             Text(
-              "FREE", 
+              " FREE", 
               style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color:Colors.green),
             )],
           ), 
-          left: 40.0,
-          top: 40.0,
+          left: 36.0,
+          top: 34.0,
         )
       ],
     );
@@ -382,6 +398,14 @@ Future<List<CourseDetail>> fetchListCourseDetails(http.Client client) async {
   return null;
 }
 
+Future<List<CourseDetail>> fetchCourseComponents(http.Client client) async {
+  final response = await client.get("https://o2lw3pohuj.execute-api.ap-southeast-1.amazonaws.com/test/courses?status=VALID");
+  if (response.statusCode == 200) {
+    return compute(parseListCourseDetails, response.body);
+  }
+  return null;
+}
+
 List<CourseDetail> parseListCourseDetails(String responseBody) {
   var coursesJson = json.decode(responseBody) as List;
   return coursesJson != null ? coursesJson.map((i)=>CourseDetail.fromJson(i["details"])).toList() : null;
@@ -437,25 +461,69 @@ class CourseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return ListView(
+    return Container(
+      color: Colors.white,
+      child: ListView(
         children: <Widget>[
           MasterHead2(courseDetail: courseDetail,),
-          Row(
-            children: <Widget>[
-              Text(
-                "Created By " + courseDetail.instructors[0].displayName, 
-                textAlign: TextAlign.left,
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.0),
-              ),
-              Text(
-                "Created By " + courseDetail.instructors[0].displayName, 
-                textAlign: TextAlign.right,
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.0),
-              ),
-            ],
-          )
+          Container(
+            padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+            child: Column(
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Created By " + courseDetail.instructors[0].displayName, 
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 13.0, color: Colors.black, 
+                        fontWeight: FontWeight.normal, decoration: TextDecoration.none
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top:8.0, bottom:10.0),
+                      child: Text(
+                        "Last Updated " + DateTime.now().toIso8601String(), 
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: Colors.black, fontSize: 13.0, fontWeight: FontWeight.normal,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                    
+                  ],
+                ),
+                Container(
+                  color: Color.fromRGBO(209, 209, 209, 0.4),
+                  padding: EdgeInsets.all(4.0),
+                  margin: EdgeInsets.all(0.0),
+                  child: Column(
+                    children: <Widget>[
+                      Container(child: 
+                        Html(
+                          data: courseDetail.description,
+                          padding: EdgeInsets.all(4.0),
+                          defaultTextStyle: TextStyle(
+                            fontSize: 13.0, fontWeight: FontWeight.normal, color: Colors.black,
+                            decoration: TextDecoration.none
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
         ],
-      );
+      )
+    ,); 
   }
 }
 
@@ -491,7 +559,7 @@ class FeaturedCourse2 extends StatelessWidget {
               child: Text(
                 courseDetail.title, 
                 textAlign: TextAlign.left,
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18.0),),
             ),
           ),
           Positioned(
@@ -518,7 +586,8 @@ class FeaturedCourse2 extends StatelessWidget {
             noOfStudent: courseDetail.numStudents,),
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
-      )
+      ),
+      elevation: 0.4,
     );
   }
 }
