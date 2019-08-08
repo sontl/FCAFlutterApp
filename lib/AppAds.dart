@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 
 class AppAds {
   static Ads _ads;
-
+  // TODO find the way to use production id
   static final String _appId = Platform.isAndroid
       ? 'ca-app-pub-3940256099942544~3347511713'
       : 'ca-app-pub-3940256099942544~1458002511';
@@ -70,12 +70,17 @@ class AppAds {
 
   static void hideBanner() => _ads?.hideBannerAd();
 
+  static void showInterstitialAds(){
+    
+  }
+
+
   /// Call this static function in your State object's initState() function.
   static void init() => _ads ??= Ads(
     _appId,
     bannerUnitId: _bannerUnitId,
-    keywords: <String>['ibm', 'computers'],
-    contentUrl: 'http://www.ibm.com',
+    keywords: <String>['udemy', 'course'],
+    contentUrl: 'http://www.udemy.com',
     childDirected: false,
     testDevices: ['Samsung_Galaxy_SII_API_26:5554'],
     testing: true,

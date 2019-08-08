@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:FreePremiumCourse/AppAds.dart';
 import 'package:FreePremiumCourse/models/CourseDetail.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -92,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     AppAds.init();
-    AppAds.showBanner(state: this);
+    AppAds.showBanner(state: this, anchorOffset: 0.0, anchorType: AnchorType.bottom);
   }
 
   @override
@@ -170,12 +171,12 @@ class _MyHomePageState extends State<MyHomePage> {
           //CourseInfoListItem()
         ],
       ), 
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.search),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _incrementCounter,
+      //   tooltip: 'Increment',
+      //   child: Icon(Icons.search),
         
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
@@ -226,7 +227,8 @@ class FeaturedCourse extends StatelessWidget {
             rating: courseDetail.avgRating, 
             noOfRatings: courseDetail.numReviews, 
             price: courseDetail.listingPrice,
-            noOfStudent: courseDetail.numStudents,),
+            noOfStudent: courseDetail.numStudents,
+            showPrice: false,),
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       )
@@ -322,8 +324,9 @@ class CourseInfoHightlight extends StatelessWidget {
   final String price;
   final int noOfRatings;
   final int noOfStudent;
+  final bool showPrice;
 
-  CourseInfoHightlight({ this.rating = .0, this.price, this.noOfRatings=0, this.noOfStudent=0});
+  CourseInfoHightlight({ this.rating = .0, this.price, this.noOfRatings=0, this.noOfStudent=0, this.showPrice=true});
   
   Widget build(BuildContext context) {
     var info = <Widget>[];
@@ -346,27 +349,30 @@ class CourseInfoHightlight extends StatelessWidget {
         style: TextStyle(fontSize: 12.0)
       ),
     );
-    info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 12.0, 0.0)));
-    info.add(
-      Text(
-        price, 
-        style: TextStyle(
-          decoration: TextDecoration.lineThrough,
-          fontWeight: FontWeight.bold,
-          fontSize: 14.0,
-        ),
-      )
-    );
-    info.add(
-      Text(
-        " FREE", 
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 15.0,
-          color: Colors.green
-        ),
-      )
-    );
+    if (showPrice) {
+      info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 12.0, 0.0)));
+      info.add(
+        Text(
+          price, 
+          style: TextStyle(
+            decoration: TextDecoration.lineThrough,
+            fontWeight: FontWeight.bold,
+            fontSize: 14.0,
+          ),
+        )
+      );
+      info.add(
+        Text(
+          " FREE", 
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15.0,
+            color: Colors.green
+          ),
+        )
+      );
+    }
+    
     return Container(
       width: MediaQuery.of(context).size.width - 20,
       child: Row(
@@ -500,6 +506,45 @@ class CourseDetailPage extends StatelessWidget {
                     
                   ],
                 ),
+                new RaisedButton(
+                  child: const Text('SHOW COUPON', style: TextStyle(fontSize: 20, color: Colors.white)),
+                  color: Theme.of(context).accentColor,
+                  elevation: 4.0,
+                  splashColor: Colors.blueGrey,
+                  highlightElevation: 8.0,
+                  disabledElevation: 0.0,
+                  onPressed: () {
+                    MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
+                      keywords: <String>['udemy', 'course'],
+                      contentUrl: 'https://udemy.com',
+                      childDirected: false,
+                      testDevices: <String>[], // Android emulators are considered test devices
+                    );
+
+                    InterstitialAd myInterstitial = InterstitialAd(
+                      // Replace the testAdUnitId with an ad unit id from the AdMob dash.
+                      // https://developers.google.com/admob/android/test-ads
+                      // https://developers.google.com/admob/ios/test-ads
+                      adUnitId: InterstitialAd.testAdUnitId,
+                      targetingInfo: targetingInfo,
+                      listener: (MobileAdEvent event) {
+                        print("InterstitialAd event is $event");
+                        if (event == MobileAdEvent.closed){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => CouponDetailPage()),);
+                        }
+                      },
+                    );
+
+                    myInterstitial
+                      ..load()
+                      ..show(
+                        anchorType: AnchorType.bottom,
+                        anchorOffset: 0.0,
+                      );
+
+                  },
+                ),
+                const SizedBox(height: 10),
                 Container(
                   color: Color.fromRGBO(209, 209, 209, 0.4),
                   padding: EdgeInsets.all(4.0),
@@ -564,10 +609,35 @@ class FeaturedCourse2 extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 12.0,
-            left: 12.0,
-            child: BackButton()  
-          ,)
+            top: 10.0,
+            left: 10.0,
+            child: BackButton(),  
+          ),
+          Positioned(
+            child: Row(children: <Widget> [
+              Container(
+                color: Colors.white60.withOpacity(0.8),
+                child: Text(
+                  courseDetail.listingPrice, 
+                  style: TextStyle(
+                    decoration: TextDecoration.lineThrough,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+              Container(
+                color: Colors.white60.withOpacity(0.8),
+                child: Text(
+                  " FREE", 
+                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color:Colors.green),
+                ),
+              )],
+            ), 
+            right: 10.0,
+            top: 10.0,
+          )
         ],
       )
     ); 
@@ -584,7 +654,8 @@ class FeaturedCourse2 extends StatelessWidget {
             rating: courseDetail.avgRating, 
             noOfRatings: courseDetail.numReviews, 
             price: courseDetail.listingPrice,
-            noOfStudent: courseDetail.numStudents,),
+            noOfStudent: courseDetail.numStudents,
+            showPrice: false,),
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       ),
@@ -594,11 +665,6 @@ class FeaturedCourse2 extends StatelessWidget {
 }
 
 class BackButton extends StatelessWidget {
-  Future<Widget> buildHomePageAsync() async {
-    return Future.microtask(() {
-        return MyHomePage(title: 'Free Premium Udemy Courses', courses: globals.courses );
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -620,3 +686,56 @@ class BackButton extends StatelessWidget {
     );
   }
 }
+
+class CouponDetailPage extends StatelessWidget {
+    final CourseDetail course;
+
+    CouponDetailPage({Key key, this.course}) : super(key: key);
+
+    @override 
+    Widget build(BuildContext context) {
+      return Container(
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            const SizedBox(height: 140),
+            Container(
+              child: Text("COUPON CODE HERE", style: TextStyle(color: Colors.blueAccent, fontSize: 30.0, decoration: TextDecoration.none),)
+            ),
+            const SizedBox(height: 80),
+            Row(
+              children: <Widget>[
+                RaisedButton(
+                  child: Text("COPY"),
+                  elevation: 4.0,
+                  onPressed: () {
+                    
+                  },
+                )
+            ]),
+            Row (
+              children: <Widget>[
+                RaisedButton(
+                child: Text("OPEN BROWSER"),
+                onPressed: () {
+                  // Perform some action
+                },
+              ),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                RaisedButton(
+                  child: Text("BACK"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                )
+              ],
+            ) 
+          ],
+        ),
+      );
+    }
+  }
