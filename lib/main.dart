@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
 import 'package:FreePremiumCourse/models/Globals.dart' as globals;
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(new MyApp());
@@ -167,8 +168,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.push(context, route);
               },  
               child: CourseInfoListItem(courseDetail: item)
-              )
+              ),
           //CourseInfoListItem()
+          const SizedBox(height: 40),
         ],
       ), 
       // floatingActionButton: FloatingActionButton(
@@ -466,8 +468,32 @@ class CourseDetailPage extends StatelessWidget {
   final CourseDetail courseDetail;
   CourseDetailPage(this.courseDetail);
 
+  MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
+    keywords: <String>['udemy', 'course'],
+    contentUrl: 'https://udemy.com',
+    childDirected: false,
+    testDevices: <String>[], // Android emulators are considered test devices
+  );
+  
   @override
   Widget build(BuildContext context) {
+    InterstitialAd myInterstitial = InterstitialAd(
+      // Replace the testAdUnitId with an ad unit id from the AdMob dash.
+      // https://developers.google.com/admob/android/test-ads
+      // https://developers.google.com/admob/ios/test-ads
+      adUnitId: InterstitialAd.testAdUnitId,
+      targetingInfo: targetingInfo,
+      listener: (MobileAdEvent event) {
+        print("InterstitialAd event is $event");
+        if (event == MobileAdEvent.closed){
+          AppAds.dispose();
+          Navigator.push(context, MaterialPageRoute(builder: (context) => CouponDetailPage()),);
+        }
+      },
+    );
+
+    myInterstitial.load();
+      
     return Container(
       color: Colors.white,
       child: ListView(
@@ -514,34 +540,10 @@ class CourseDetailPage extends StatelessWidget {
                   highlightElevation: 8.0,
                   disabledElevation: 0.0,
                   onPressed: () {
-                    MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
-                      keywords: <String>['udemy', 'course'],
-                      contentUrl: 'https://udemy.com',
-                      childDirected: false,
-                      testDevices: <String>[], // Android emulators are considered test devices
+                    myInterstitial.show(
+                      anchorType: AnchorType.bottom,
+                      anchorOffset: 0.0,
                     );
-
-                    InterstitialAd myInterstitial = InterstitialAd(
-                      // Replace the testAdUnitId with an ad unit id from the AdMob dash.
-                      // https://developers.google.com/admob/android/test-ads
-                      // https://developers.google.com/admob/ios/test-ads
-                      adUnitId: InterstitialAd.testAdUnitId,
-                      targetingInfo: targetingInfo,
-                      listener: (MobileAdEvent event) {
-                        print("InterstitialAd event is $event");
-                        if (event == MobileAdEvent.closed){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => CouponDetailPage()),);
-                        }
-                      },
-                    );
-
-                    myInterstitial
-                      ..load()
-                      ..show(
-                        anchorType: AnchorType.bottom,
-                        anchorOffset: 0.0,
-                      );
-
                   },
                 ),
                 const SizedBox(height: 10),
@@ -692,6 +694,13 @@ class CouponDetailPage extends StatelessWidget {
 
     CouponDetailPage({Key key, this.course}) : super(key: key);
 
+    _launchURL(url) async {
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
+    }
     @override 
     Widget build(BuildContext context) {
       return Container(
@@ -719,7 +728,7 @@ class CouponDetailPage extends StatelessWidget {
                 RaisedButton(
                 child: Text("OPEN BROWSER"),
                 onPressed: () {
-                  // Perform some action
+                  _launchURL("https://www.udemy.com/logistic-regression-decision-tree-and-neural-network-in-r/");
                 },
               ),
               ],
