@@ -5,6 +5,7 @@ import 'package:FreePremiumCourse/models/CourseDetail.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
 import 'package:FreePremiumCourse/models/Globals.dart' as globals;
@@ -165,7 +166,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 // );
                 var page = await buildCourseDetailPageAsync(item);
                 var route = MaterialPageRoute(builder: (_) => page);
-                Navigator.push(context, route);
+                //Navigator.push(context, route);
+                Navigator.of(context)
+                  .push(route)
+                  .then((value) {
+                    print(value);
+                    AppAds.dispose();
+                    AppAds.init();
+                    AppAds.showBanner(state: this, anchorOffset: 0.0, anchorType: AnchorType.bottom);
+                  });
               },  
               child: CourseInfoListItem(courseDetail: item)
               ),
@@ -486,7 +495,6 @@ class CourseDetailPage extends StatelessWidget {
       listener: (MobileAdEvent event) {
         print("InterstitialAd event is $event");
         if (event == MobileAdEvent.closed){
-          AppAds.dispose();
           Navigator.push(context, MaterialPageRoute(builder: (context) => CouponDetailPage()),);
         }
       },
@@ -694,6 +702,18 @@ class CouponDetailPage extends StatelessWidget {
 
     CouponDetailPage({Key key, this.course}) : super(key: key);
 
+    @override 
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Coupon code'),
+        ),
+        body: SnackBarPage(), // Complete this code in the next step.
+      );
+    }
+  }
+
+  class SnackBarPage extends StatelessWidget {
     _launchURL(url) async {
       if (await canLaunch(url)) {
         await launch(url);
@@ -701,50 +721,55 @@ class CouponDetailPage extends StatelessWidget {
         throw 'Could not launch $url';
       }
     }
-    @override 
+    @override
     Widget build(BuildContext context) {
       return Container(
         color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            const SizedBox(height: 140),
+            const SizedBox(height: 120),
             Container(
               child: Text("COUPON CODE HERE", style: TextStyle(color: Colors.blueAccent, fontSize: 30.0, decoration: TextDecoration.none),)
             ),
-            const SizedBox(height: 80),
+            const SizedBox(height: 120),
             Row(
               children: <Widget>[
                 RaisedButton(
                   child: Text("COPY"),
                   elevation: 4.0,
                   onPressed: () {
-                    
+                    Clipboard.setData(new ClipboardData(text: "your text"));
+
+                    AppAds.dispose();
+                    final snackBar = SnackBar(
+                      content: Text('Yay! Coupon is copied!'),
+                      action: SnackBarAction(
+                        label: 'Undo',
+                        onPressed: () {
+                        // Some code to undo the change.
+                      },
+                    ),
+                  );
+
+                  // Find the Scaffold in the widget tree and use
+                  // it to show a SnackBar.
+                  Scaffold.of(context).showSnackBar(snackBar);
                   },
                 )
             ]),
             Row (
               children: <Widget>[
                 RaisedButton(
-                child: Text("OPEN BROWSER"),
+                child: Text("TAKE IT NOW"),
                 onPressed: () {
                   _launchURL("https://www.udemy.com/logistic-regression-decision-tree-and-neural-network-in-r/");
                 },
               ),
               ],
             ),
-            Row(
-              children: <Widget>[
-                RaisedButton(
-                  child: Text("BACK"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                )
-              ],
-            ) 
           ],
         ),
       );
     }
-  }
+}
