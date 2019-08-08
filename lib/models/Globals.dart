@@ -1,4 +1,4 @@
 
-import 'package:FreePremiumCourse/models/CourseDetail.dart';
+import 'package:FreePremiumCourse/models/CourseStatus.dart';
 
-List<CourseDetail> courses; 
+List<CourseStatus> courses; 

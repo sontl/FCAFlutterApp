@@ -70,11 +70,6 @@ class AppAds {
 
   static void hideBanner() => _ads?.hideBannerAd();
 
-  static void showInterstitialAds(){
-    
-  }
-
-
   /// Call this static function in your State object's initState() function.
   static void init() => _ads ??= Ads(
     _appId,

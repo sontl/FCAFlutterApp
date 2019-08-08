@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:FreePremiumCourse/AppAds.dart';
 import 'package:FreePremiumCourse/models/CourseDetail.dart';
+import 'package:FreePremiumCourse/models/CourseStatus.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  final List<CourseDetail> courses;
+  final List<CourseStatus> courses;
   final String title;
   MyHomePage({Key key, this.title, this.courses}) : super(key: key);
   
@@ -132,32 +133,32 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text("ALL CATEGORIES", style: TextStyle(fontSize: 25.0, color: Colors.white,),),
         elevation: 0.0,
         centerTitle: false,
-        actions: <Widget>[
-          // overflow menu
-          PopupMenuButton<Choice>(
-            onSelected: _select,
-            icon: Icon(Icons.category),
-            itemBuilder: (BuildContext context) {
-              return choices.skip(2).map((Choice choice) {
-                return PopupMenuItem<Choice>(
-                  value: choice,
-                  child: Text(choice.title),
-                );
-              }).toList();
-            },
-          ),
-        ],
+        // actions: <Widget>[
+        //   // overflow menu
+        //   PopupMenuButton<Choice>(
+        //     onSelected: _select,
+        //     icon: Icon(Icons.category),
+        //     itemBuilder: (BuildContext context) {
+        //       return choices.skip(2).map((Choice choice) {
+        //         return PopupMenuItem<Choice>(
+        //           value: choice,
+        //           child: Text(choice.title),
+        //         );
+        //       }).toList();
+        //     },
+        //   ),
+        // ],
       ),
       body: ListView(
         children: <Widget>[
-          MasterHead(courseDetail: widget.courses[0],),
+          MasterHead(courseDetail: widget.courses[0].courseDetail,),
           Row(
             children: <Widget>[
               const Padding(padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0)),
               Text(totalFreeCourses + " free courses in ALL CATEGORIES")
           ],),
           //Row(children: widget.courses.map((item) => new CourseInfoListItem(courseDetail: item)).toList()),
-          for(var item in widget.courses) 
+          for(var item in widget.courses)  
             GestureDetector(
               onTap: () async{
                 // Navigator.push(
@@ -176,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     AppAds.showBanner(state: this, anchorOffset: 0.0, anchorType: AnchorType.bottom);
                   });
               },  
-              child: CourseInfoListItem(courseDetail: item)
+              child: CourseInfoListItem(courseDetail: item.courseDetail)
               ),
           //CourseInfoListItem()
           const SizedBox(height: 40),
@@ -234,12 +235,16 @@ class FeaturedCourse extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
             child: Text(courseDetail.headline),
           ), 
-          CourseInfoHightlight(
-            rating: courseDetail.avgRating, 
-            noOfRatings: courseDetail.numReviews, 
-            price: courseDetail.listingPrice,
-            noOfStudent: courseDetail.numStudents,
-            showPrice: false,),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
+            child: CourseInfoHightlight(
+              rating: courseDetail.avgRating, 
+              noOfRatings: courseDetail.numReviews, 
+              price: courseDetail.listingPrice,
+              noOfStudent: courseDetail.numStudents,
+              showPrice: false,
+            ),
+          ),
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       )
@@ -314,11 +319,14 @@ class CourseInfoListItem extends StatelessWidget {
           Row (
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              CourseInfoHightlight(
-                rating: courseDetail.avgRating, 
-                noOfRatings: courseDetail.numReviews,
-                price: courseDetail.listingPrice,
-                noOfStudent: courseDetail.numStudents,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(3.0, 0.0, 0.0, 0.0),
+                child: CourseInfoHightlight(
+                  rating: courseDetail.avgRating, 
+                  noOfRatings: courseDetail.numReviews, 
+                  price: courseDetail.listingPrice,
+                  noOfStudent: courseDetail.numStudents,
+                ),
               ),
             ],
           ),
@@ -393,22 +401,7 @@ class CourseInfoHightlight extends StatelessWidget {
   }
 }
 
-Future<CourseDetail> fetchCourseDetails(http.Client client, courseId) async {
-  final response =
-      await client.get('https://www.udemy.com/api-2.0/courses/' + courseId 
-        + '?fields[course]=title,is_paid,image_480x270,num_reviews,price,context_info,primary_category,primary_subcategory,avg_rating_recent,visible_instructors,locale,estimated_content_length,num_subscribers,headline,description');
-
-  if (response.statusCode == 200) {
-    // If server returns an OK response, parse the JSON.
-    return CourseDetail.fromJson(json.decode(response.body));
-  } else {
-    // If that response was not OK, throw an error.
-    throw Exception('Failed to load post');
-  }
-}
-
-
-Future<List<CourseDetail>> fetchListCourseDetails(http.Client client) async {
+Future<List<CourseStatus>> fetchListCourseDetails(http.Client client) async {
   final response = await client.get("https://o2lw3pohuj.execute-api.ap-southeast-1.amazonaws.com/test/courses?status=VALID");
   if (response.statusCode == 200) {
     return compute(parseListCourseDetails, response.body);
@@ -416,7 +409,7 @@ Future<List<CourseDetail>> fetchListCourseDetails(http.Client client) async {
   return null;
 }
 
-Future<List<CourseDetail>> fetchCourseComponents(http.Client client) async {
+Future<List<CourseStatus>> fetchCourseComponents(http.Client client) async {
   final response = await client.get("https://o2lw3pohuj.execute-api.ap-southeast-1.amazonaws.com/test/courses?status=VALID");
   if (response.statusCode == 200) {
     return compute(parseListCourseDetails, response.body);
@@ -424,9 +417,9 @@ Future<List<CourseDetail>> fetchCourseComponents(http.Client client) async {
   return null;
 }
 
-List<CourseDetail> parseListCourseDetails(String responseBody) {
+List<CourseStatus> parseListCourseDetails(String responseBody) {
   var coursesJson = json.decode(responseBody) as List;
-  return coursesJson != null ? coursesJson.map((i)=>CourseDetail.fromJson(i["details"])).toList() : null;
+  return coursesJson != null ? coursesJson.map((i)=>CourseStatus.fromJson(i)).toList() : null;
 } 
 
 typedef void RatingChangeCallback(double rating);
@@ -474,8 +467,8 @@ class StarRating extends StatelessWidget {
 }
 
 class CourseDetailPage extends StatelessWidget {
-  final CourseDetail courseDetail;
-  CourseDetailPage(this.courseDetail);
+  final CourseStatus courseStatus;
+  CourseDetailPage(this.courseStatus);
 
   MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
     keywords: <String>['udemy', 'course'],
@@ -495,7 +488,7 @@ class CourseDetailPage extends StatelessWidget {
       listener: (MobileAdEvent event) {
         print("InterstitialAd event is $event");
         if (event == MobileAdEvent.closed){
-          Navigator.push(context, MaterialPageRoute(builder: (context) => CouponDetailPage()),);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => CouponDetailPage(course: courseStatus,)),);
         }
       },
     );
@@ -506,7 +499,7 @@ class CourseDetailPage extends StatelessWidget {
       color: Colors.white,
       child: ListView(
         children: <Widget>[
-          MasterHead2(courseDetail: courseDetail,),
+          MasterHead2(courseDetail: courseStatus.courseDetail,),
           Container(
             padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
             child: Column(
@@ -515,7 +508,7 @@ class CourseDetailPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      "Created By " + courseDetail.instructors[0].displayName, 
+                      "Created By " + courseStatus.courseDetail.instructors[0].displayName, 
                       textAlign: TextAlign.left,
                       style: TextStyle(
                         fontSize: 13.0, color: Colors.black, 
@@ -563,7 +556,7 @@ class CourseDetailPage extends StatelessWidget {
                     children: <Widget>[
                       Container(child: 
                         Html(
-                          data: courseDetail.description,
+                          data: courseStatus.courseDetail.description,
                           padding: EdgeInsets.all(4.0),
                           defaultTextStyle: TextStyle(
                             fontSize: 13.0, fontWeight: FontWeight.normal, color: Colors.black,
@@ -698,78 +691,81 @@ class BackButton extends StatelessWidget {
 }
 
 class CouponDetailPage extends StatelessWidget {
-    final CourseDetail course;
+  final CourseStatus course;
 
-    CouponDetailPage({Key key, this.course}) : super(key: key);
+  CouponDetailPage({Key key, this.course}) : super(key: key);
 
-    @override 
-    Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Coupon code'),
-        ),
-        body: SnackBarPage(), // Complete this code in the next step.
-      );
+  @override 
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Coupon code'),
+      ),
+      body: SnackBarPage(courseStatus: course,), // Complete this code in the next step.
+    );
+  }
+}
+
+class SnackBarPage extends StatelessWidget {
+  CourseStatus courseStatus;
+  SnackBarPage({this.courseStatus});
+
+  _launchURL(url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
     }
   }
-
-  class SnackBarPage extends StatelessWidget {
-    _launchURL(url) async {
-      if (await canLaunch(url)) {
-        await launch(url);
-      } else {
-        throw 'Could not launch $url';
-      }
-    }
-    @override
-    Widget build(BuildContext context) {
-      return Container(
-        color: Colors.white,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            const SizedBox(height: 120),
-            Container(
-              child: Text("COUPON CODE HERE", style: TextStyle(color: Colors.blueAccent, fontSize: 30.0, decoration: TextDecoration.none),)
-            ),
-            const SizedBox(height: 120),
-            Row(
-              children: <Widget>[
-                RaisedButton(
-                  child: Text("COPY"),
-                  elevation: 4.0,
-                  onPressed: () {
-                    Clipboard.setData(new ClipboardData(text: "your text"));
-
-                    AppAds.dispose();
-                    final snackBar = SnackBar(
-                      content: Text('Yay! Coupon is copied!'),
-                      action: SnackBarAction(
-                        label: 'Undo',
-                        onPressed: () {
-                        // Some code to undo the change.
-                      },
-                    ),
-                  );
-
-                  // Find the Scaffold in the widget tree and use
-                  // it to show a SnackBar.
-                  Scaffold.of(context).showSnackBar(snackBar);
-                  },
-                )
-            ]),
-            Row (
-              children: <Widget>[
-                RaisedButton(
-                child: Text("TAKE IT NOW"),
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          const SizedBox(height: 120),
+          Container(
+            child: Text(courseStatus.couponCode, style: TextStyle(color: Colors.blueAccent, fontSize: 30.0, decoration: TextDecoration.none, fontWeight: FontWeight.bold),)
+          ),
+          const SizedBox(height: 120),
+          Row(
+            children: <Widget>[
+              RaisedButton(
+                child: Text("COPY"),
+                elevation: 4.0,
                 onPressed: () {
-                  _launchURL("https://www.udemy.com/logistic-regression-decision-tree-and-neural-network-in-r/");
+                  Clipboard.setData(new ClipboardData(text: courseStatus.couponCode));
+
+                  AppAds.dispose();
+                  final snackBar = SnackBar(
+                    content: Text('Yay! Coupon is copied!'),
+                    action: SnackBarAction(
+                      label: 'Undo',
+                      onPressed: () {
+                      // Some code to undo the change.
+                    },
+                  ),
+                );
+
+                // Find the Scaffold in the widget tree and use
+                // it to show a SnackBar.
+                Scaffold.of(context).showSnackBar(snackBar);
                 },
-              ),
-              ],
+              )
+          ]),
+          Row (
+            children: <Widget>[
+              RaisedButton(
+              child: Text("TAKE IT NOW"),
+              onPressed: () {
+                _launchURL(courseStatus.url);
+              },
             ),
-          ],
-        ),
-      );
-    }
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
