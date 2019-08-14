@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:FreePremiumCourse/AppAds.dart';
 import 'package:FreePremiumCourse/models/CourseDetail.dart';
 import 'package:FreePremiumCourse/models/CourseStatus.dart';
@@ -60,10 +61,6 @@ class Choice {
 const List<Choice> choices = const <Choice>[
   const Choice(title: 'Car', icon: Icons.directions_car),
   const Choice(title: 'Bicycle', icon: Icons.directions_bike),
-  const Choice(title: 'Boat', icon: Icons.directions_boat),
-  const Choice(title: 'Bus', icon: Icons.directions_bus),
-  const Choice(title: 'Train', icon: Icons.directions_railway),
-  const Choice(title: 'Walk', icon: Icons.directions_walk),
 ];
 
 class ChoiceCard extends StatelessWidget {
@@ -127,7 +124,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     var totalFreeCourses = widget.courses.length.toString();
-    
+    final _random = new Random();
+    int randomIndex = _random.nextInt(widget.courses.length);
+    CourseStatus randomFeaturedCourse = widget.courses[randomIndex];
     return Scaffold(
       appBar: AppBar(
         title: Text("ALL CATEGORIES", style: TextStyle(fontSize: 25.0, color: Colors.white,),),
@@ -151,7 +150,21 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ListView(
         children: <Widget>[
-          MasterHead(courseDetail: widget.courses[0].courseDetail,),
+          GestureDetector(
+
+            onTap: () {
+                //Navigator.push(context, route);
+                Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => CourseDetailPage(randomFeaturedCourse,)))
+                  .then((value) {
+                    print(value);
+                    AppAds.dispose();
+                    AppAds.init();
+                    AppAds.showBanner(anchorOffset: 0.0, anchorType: AnchorType.bottom);
+                  });
+              },  
+              child: MasterHead(courseStatus: randomFeaturedCourse,),
+          ),
           Row(
             children: <Widget>[
               const Padding(padding: const EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0)),
@@ -161,10 +174,6 @@ class _MyHomePageState extends State<MyHomePage> {
           for(var item in widget.courses)  
             GestureDetector(
               onTap: () async{
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => CourseDetailPage(item)),
-                // );
                 var page = await buildCourseDetailPageAsync(item);
                 var route = MaterialPageRoute(builder: (_) => page);
                 //Navigator.push(context, route);
@@ -183,20 +192,13 @@ class _MyHomePageState extends State<MyHomePage> {
           const SizedBox(height: 40),
         ],
       ), 
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _incrementCounter,
-      //   tooltip: 'Increment',
-      //   child: Icon(Icons.search),
-        
-      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
 
 class FeaturedCourse extends StatelessWidget {
-  final CourseDetail courseDetail;
-
-  FeaturedCourse({Key key, this.courseDetail}) : super(key:key);
+  final CourseStatus courseStatus;
+  FeaturedCourse({Key key, this.courseStatus}) : super(key:key);
   
   @override
   Widget build(BuildContext context) {
@@ -208,7 +210,7 @@ class FeaturedCourse extends StatelessWidget {
         fit: StackFit.loose,
         children: <Widget>[
           Center(
-            child: Image.network(courseDetail.img480x270Url, width: cardWidth,),),
+            child: Image.network(courseStatus.courseDetail.img480x270Url, width: cardWidth,),),
           Positioned(
             bottom: 0.0,
             child: Container(
@@ -216,7 +218,7 @@ class FeaturedCourse extends StatelessWidget {
               width: cardWidth,
               padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
               child: Text(
-                courseDetail.title, 
+                courseStatus.courseDetail.title, 
                 textAlign: TextAlign.left,
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16.0),),
             ),
@@ -233,15 +235,15 @@ class FeaturedCourse extends StatelessWidget {
           Container(
             width: cardWidth,
             padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-            child: Text(courseDetail.headline),
+            child: Text(courseStatus.courseDetail.headline),
           ), 
           Padding(
             padding: const EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
             child: CourseInfoHightlight(
-              rating: courseDetail.avgRating, 
-              noOfRatings: courseDetail.numReviews, 
-              price: courseDetail.listingPrice,
-              noOfStudent: courseDetail.numStudents,
+              rating: courseStatus.courseDetail.avgRating, 
+              noOfRatings: courseStatus.courseDetail.numReviews, 
+              price: courseStatus.courseDetail.listingPrice,
+              noOfStudent: courseStatus.courseDetail.numStudents,
               showPrice: false,
             ),
           ),
@@ -253,8 +255,8 @@ class FeaturedCourse extends StatelessWidget {
 }
 
 class MasterHead extends StatelessWidget {
-  final CourseDetail courseDetail;
-  MasterHead({Key key, this.courseDetail}) : super(key:key);
+  final CourseStatus courseStatus;
+  MasterHead({Key key, this.courseStatus}) : super(key:key);
   @override
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
@@ -273,12 +275,12 @@ class MasterHead extends StatelessWidget {
         ),
         Positioned(
           child: 
-            FeaturedCourse(courseDetail: courseDetail,),
+            FeaturedCourse(courseStatus: courseStatus,),
         ),
         Positioned(
           child: Row(children: <Widget> [
             Text(
-              courseDetail.listingPrice, 
+              courseStatus.courseDetail.listingPrice, 
               style: TextStyle(
                 decoration: TextDecoration.lineThrough,
                 fontWeight: FontWeight.bold,
