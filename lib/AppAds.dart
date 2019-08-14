@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:FreePremiumCourse/DeviceUtils.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:ads/ads.dart';
 import 'package:flutter/widgets.dart';
@@ -7,13 +8,15 @@ class AppAds {
   static Ads _ads;
   // TODO find the way to use production id
   static final String _appId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544~3347511713'
+      ? DeviceUtils.currentBuildMode() == BuildMode.RELEASE 
+        ? 'ca-app-pub-8426215910423009~4632576121' : 'ca-app-pub-3940256099942544~3347511713'
       : 'ca-app-pub-3940256099942544~1458002511';
 
   static final String _bannerUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111'
+      ? DeviceUtils.currentBuildMode() == BuildMode.RELEASE 
+        ? 'ca-app-pub-8426215910423009/3127868867' : 'ca-app-pub-3940256099942544/6300978111'
       : 'ca-app-pub-3940256099942544/2934735716';
-
+  
   /// Assign a listener.
   static MobileAdListener _eventListener = (MobileAdEvent event) {
     switch (event) {
@@ -77,11 +80,13 @@ class AppAds {
     keywords: <String>['udemy', 'course'],
     contentUrl: 'http://www.udemy.com',
     childDirected: false,
-    testDevices: ['Samsung_Galaxy_SII_API_26:5554'],
+    testDevices: ['SM G950F', 'ce10171afb9e520a04', '4241CF5DE5936694B15A623FA91EE37C'],
     testing: true,
     listener: _eventListener,
   );
 
   /// Remember to call this in the State object's dispose() function.
   static void dispose() => _ads?.dispose();
+
+  static void inspectAdEnv() => print("appid: " + _appId + " , bannerUnitId: " + _bannerUnitId);
 }

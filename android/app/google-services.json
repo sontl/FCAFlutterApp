@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "761544136487",
+    "firebase_url": "https://freedemy-7f1ad.firebaseio.com",
+    "project_id": "freedemy-7f1ad",
+    "storage_bucket": "freedemy-7f1ad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:761544136487:android:b739a05b8b320108",
+        "android_client_info": {
+          "package_name": "com.son.tl.freedemy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "761544136487-jl0em9h7c0qop7306h629kdtmt6co30b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.son.tl.freedemy",
+            "certificate_hash": "3c5a9ed735037f51c03028652c671d23de13e613"
+          }
+        },
+        {
+          "client_id": "761544136487-t35iiuu67ghn154mqu5chajrmrtkplt1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNkCYyQqwkRbaQ6gj7kdgF7PKSAKluLAg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "761544136487-t35iiuu67ghn154mqu5chajrmrtkplt1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

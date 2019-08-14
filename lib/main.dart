@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:FreePremiumCourse/AppAds.dart';
+import 'package:FreePremiumCourse/DeviceUtils.dart';
 import 'package:FreePremiumCourse/models/CourseDetail.dart';
 import 'package:FreePremiumCourse/models/CourseStatus.dart';
 import 'package:firebase_admob/firebase_admob.dart';
@@ -93,6 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     AppAds.init();
+    AppAds.inspectAdEnv();
     AppAds.showBanner(state: this, anchorOffset: 0.0, anchorType: AnchorType.bottom);
   }
 
@@ -129,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
     CourseStatus randomFeaturedCourse = widget.courses[randomIndex];
     return Scaffold(
       appBar: AppBar(
-        title: Text("ALL CATEGORIES", style: TextStyle(fontSize: 25.0, color: Colors.white,),),
+        title: Text("FREEDEMY", style: TextStyle(fontSize: 25.0, color: Colors.white,),),
         elevation: 0.0,
         centerTitle: false,
         // actions: <Widget>[
@@ -160,6 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     print(value);
                     AppAds.dispose();
                     AppAds.init();
+                    AppAds.inspectAdEnv();
                     AppAds.showBanner(anchorOffset: 0.0, anchorType: AnchorType.bottom);
                   });
               },  
@@ -183,6 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     print(value);
                     AppAds.dispose();
                     AppAds.init();
+                    AppAds.inspectAdEnv();
                     AppAds.showBanner(state: this, anchorOffset: 0.0, anchorType: AnchorType.bottom);
                   });
               },  
@@ -470,6 +475,7 @@ class StarRating extends StatelessWidget {
 
 class CourseDetailPage extends StatelessWidget {
   final CourseStatus courseStatus;
+  bool ignoreFullScreenAds = false;
   CourseDetailPage(this.courseStatus);
 
   MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
@@ -481,21 +487,29 @@ class CourseDetailPage extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    var adUnitId = DeviceUtils.currentBuildMode() == BuildMode.RELEASE 
+        ? Platform.isAndroid ? 'ca-app-pub-8426215910423009/2020162133'
+            : 'ca-app-pub-3940256099942544/4411468910' 
+        : InterstitialAd.testAdUnitId;
+    print('InterstitialAd id: ' + adUnitId);
     InterstitialAd myInterstitial = InterstitialAd(
       // Replace the testAdUnitId with an ad unit id from the AdMob dash.
       // https://developers.google.com/admob/android/test-ads
       // https://developers.google.com/admob/ios/test-ads
-      adUnitId: InterstitialAd.testAdUnitId,
+      adUnitId: adUnitId,
       targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {
-        print("InterstitialAd event is $event");
         if (event == MobileAdEvent.closed){
           Navigator.push(context, MaterialPageRoute(builder: (context) => CouponDetailPage(course: courseStatus,)),);
+        } else if (event == MobileAdEvent.failedToLoad) {
+          ignoreFullScreenAds = true;
         }
       },
     );
 
-    myInterstitial.load();
+    myInterstitial.load().catchError((e){
+      print(e);
+    });
       
     return Container(
       color: Colors.white,
@@ -543,10 +557,16 @@ class CourseDetailPage extends StatelessWidget {
                   highlightElevation: 8.0,
                   disabledElevation: 0.0,
                   onPressed: () {
-                    myInterstitial.show(
-                      anchorType: AnchorType.bottom,
-                      anchorOffset: 0.0,
-                    );
+                    if (ignoreFullScreenAds) {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => CouponDetailPage(course: courseStatus,)),);
+                    } else {
+                      myInterstitial.show(
+                        anchorType: AnchorType.bottom,
+                        anchorOffset: 0.0,
+                      ).catchError((error){
+                        print(error);
+                      });
+                    }
                   },
                 ),
                 const SizedBox(height: 10),
@@ -743,7 +763,7 @@ class SnackBarPage extends StatelessWidget {
                   final snackBar = SnackBar(
                     content: Text('Yay! Coupon is copied!'),
                     action: SnackBarAction(
-                      label: 'Undo',
+                      label: 'Close',
                       onPressed: () {
                       // Some code to undo the change.
                     },
