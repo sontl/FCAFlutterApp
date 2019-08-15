@@ -1,4 +1,4 @@
-import 'package:FreePremiumCourse/models/CourseDetail.dart';
+import 'package:Freedemy/models/CourseDetail.dart';
 
 class CourseStatus {
   String status;

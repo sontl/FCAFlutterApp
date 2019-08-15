@@ -1,5 +1,5 @@
 
-import 'package:FreePremiumCourse/models/Instructor.dart';
+import 'package:Freedemy/models/Instructor.dart';
 
 class CourseDetail {
   int id;

@@ -1,4 +1,4 @@
-import 'package:FreePremiumCourse/models/Data.dart';
+import 'package:Freedemy/models/Data.dart';
 
 class Curriculum {
   Data data;

@@ -2,17 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'package:FreePremiumCourse/AppAds.dart';
-import 'package:FreePremiumCourse/DeviceUtils.dart';
-import 'package:FreePremiumCourse/models/CourseDetail.dart';
-import 'package:FreePremiumCourse/models/CourseStatus.dart';
+import 'package:Freedemy/AppAds.dart';
+import 'package:Freedemy/DeviceUtils.dart';
+import 'package:Freedemy/models/CourseDetail.dart';
+import 'package:Freedemy/models/CourseStatus.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
-import 'package:FreePremiumCourse/models/Globals.dart' as globals;
+import 'package:Freedemy/models/Globals.dart' as globals;
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {

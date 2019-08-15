@@ -1,4 +1,4 @@
-import 'package:FreePremiumCourse/models/Item.dart';
+import 'package:Freedemy/models/Item.dart';
 
 class Section {
   List<Item> items;

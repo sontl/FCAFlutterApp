@@ -1,4 +1,4 @@
 
-import 'package:FreePremiumCourse/models/CourseStatus.dart';
+import 'package:Freedemy/models/CourseStatus.dart';
 
 List<CourseStatus> courses; 

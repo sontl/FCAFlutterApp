@@ -1,4 +1,4 @@
-import 'package:FreePremiumCourse/models/Curriculum.dart';
+import 'package:Freedemy/models/Curriculum.dart';
 
 class CourseComponent {
   String courseId;

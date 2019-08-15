@@ -1,4 +1,4 @@
-import 'package:FreePremiumCourse/models/Section.dart';
+import 'package:Freedemy/models/Section.dart';
 
 class Data {
   List<Section> displayedSections;
