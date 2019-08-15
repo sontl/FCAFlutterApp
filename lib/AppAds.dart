@@ -80,7 +80,7 @@ class AppAds {
     keywords: <String>['udemy', 'course'],
     contentUrl: 'http://www.udemy.com',
     childDirected: false,
-    testDevices: ['SM G950F', 'ce10171afb9e520a04', '4241CF5DE5936694B15A623FA91EE37C','flutter_emulator:5554'],
+    testDevices: ['SM G950F', 'ce10171afb9e520a04', '4241CF5DE5936694B15A623FA91EE37C','flutter_emulator:5554', 'kGADSimulatorID'],
     testing: true,
     listener: _eventListener,
   );

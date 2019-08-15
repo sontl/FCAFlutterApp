@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
 import 'package:Freedemy/models/Globals.dart' as globals;
+import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
@@ -752,6 +753,20 @@ class SnackBarPage extends StatelessWidget {
             child: Text(courseStatus.couponCode, style: TextStyle(color: Colors.blueAccent, fontSize: 30.0, decoration: TextDecoration.none, fontWeight: FontWeight.bold),)
           ),
           const SizedBox(height: 120),
+          Row(
+            children: <Widget>[
+              RaisedButton(
+                child: const Text('SHARE'),
+                onPressed: () {
+                  final RenderBox box = context.findRenderObject();
+                  Share.share(courseStatus.url,
+                      sharePositionOrigin:
+                      box.localToGlobal(Offset.zero) &
+                      box.size);
+                },
+              ),
+            ],
+          ),
           Row(
             children: <Widget>[
               RaisedButton(
