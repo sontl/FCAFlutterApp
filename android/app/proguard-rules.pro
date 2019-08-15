@@ -19,8 +19,15 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
--keepattributes SourceFile,LineNumberTable
+#-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
--renamesourcefileattribute SourceFile
+#-renamesourcefileattribute SourceFile
+-keep public class com.google.firebase.analytics.FirebaseAnalytics {
+   public *;
+}
+
+-keep public class com.google.android.gms.measurement.AppMeasurement {
+    public *;
+}
