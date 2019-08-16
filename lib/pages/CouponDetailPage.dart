@@ -1,4 +1,4 @@
-import 'package:Freedemy/AppAds.dart';
+import 'package:Freedemy/pages/AppAds.dart';
 import 'package:Freedemy/models/CourseStatus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

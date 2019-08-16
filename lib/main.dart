@@ -1,5 +1,5 @@
 import 'package:Freedemy/pages/MyHomePage.dart';
-import 'package:Freedemy/pages/services/AWSLambdaSvc.dart';
+import 'package:Freedemy/services/AWSLambdaSvc.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:Freedemy/models/Globals.dart' as globals;

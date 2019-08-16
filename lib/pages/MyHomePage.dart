@@ -1,10 +1,9 @@
 import 'dart:math';
-
-import 'package:Freedemy/AppAds.dart';
 import 'package:Freedemy/models/CourseDetail.dart';
 import 'package:Freedemy/models/CourseStatus.dart';
 import 'package:Freedemy/pages/CourseDetailPage.dart';
 import 'package:Freedemy/pages/common/FCAStarRating.dart';
+import 'package:Freedemy/pages/AppAds.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

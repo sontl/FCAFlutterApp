@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:Freedemy/DeviceUtils.dart';
+import 'package:Freedemy/utils/DeviceUtils.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:ads/ads.dart';
 import 'package:flutter/widgets.dart';

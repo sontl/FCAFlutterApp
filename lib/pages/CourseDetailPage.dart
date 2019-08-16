@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:Freedemy/DeviceUtils.dart';
+import 'package:Freedemy/utils/DeviceUtils.dart';
 import 'package:Freedemy/models/CourseDetail.dart';
 import 'package:Freedemy/models/CourseStatus.dart';
 import 'package:Freedemy/pages/CouponDetailPage.dart';
