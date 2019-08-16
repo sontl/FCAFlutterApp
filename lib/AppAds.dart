@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 
 class AppAds {
   static Ads _ads;
-  // TODO find the way to use production id
   static final String _appId = Platform.isAndroid
       ? DeviceUtils.currentBuildMode() == BuildMode.RELEASE 
         ? 'ca-app-pub-8426215910423009~4632576121' : 'ca-app-pub-3940256099942544~3347511713'
@@ -71,6 +70,7 @@ class AppAds {
       anchorType: anchorType,
     );
 
+  @deprecated
   static void hideBanner() => _ads?.hideBannerAd();
 
   /// Call this static function in your State object's initState() function.
