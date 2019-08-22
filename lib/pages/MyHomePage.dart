@@ -198,7 +198,7 @@ class FeaturedCourse extends StatelessWidget {
                   textDirection: Directionality.of(context),
                   layoutDirection: Directionality.of(context),
                   location: BannerLocation.topStart,
-                  color: Colors.green,
+                  color: Colors.blue,
                 ),
               ),
             ) 
@@ -259,14 +259,17 @@ class MasterHead extends StatelessWidget {
         ),
         Positioned(
           child: Row(children: <Widget> [
-            Text(
-              courseStatus.courseDetail.listingPrice, 
-              style: TextStyle(
-                decoration: TextDecoration.lineThrough,
-                fontWeight: FontWeight.bold,
-                fontSize: 16.0,
-                color: Colors.blue,
-              ),
+            Container(
+              color: Colors.white60.withOpacity(0.7),
+              child: Text(
+                courseStatus.courseDetail.listingPrice, 
+                style: TextStyle(
+                  decoration: TextDecoration.lineThrough,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0,
+                  color: Colors.blueGrey,
+                ),
+              )
             ),
           ],), 
           left: 76.0,
@@ -314,7 +317,7 @@ class CourseInfoListItem extends StatelessWidget {
             child: Banner(
               message: "FREE",
               location: BannerLocation.topStart,
-              color: Colors.green,
+              color: Colors.lightBlue,
               child: Container(
                 height: 60.0,
                 width: 60.0,
@@ -373,7 +376,7 @@ class CourseInfoHightlight extends StatelessWidget {
             style: TextStyle(
               decoration: TextDecoration.lineThrough,
               fontWeight: FontWeight.bold,
-              fontSize: 14.0,
+              fontSize: 13.0,
             ),
           ),
         ],

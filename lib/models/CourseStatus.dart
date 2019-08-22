@@ -5,9 +5,10 @@ class CourseStatus {
   String courseId;
   String url;
   String couponCode;
+  String modifiedDate;
   CourseDetail courseDetail;
 
-  CourseStatus({this.status, this.courseId, this.url, this.couponCode, this.courseDetail});
+  CourseStatus({this.status, this.courseId, this.url, this.couponCode, this.courseDetail, this.modifiedDate});
 
   factory CourseStatus.fromJson(Map<String, dynamic> json) {
     var courseDetailJson = json['details'];
@@ -20,6 +21,7 @@ class CourseStatus {
       status: json['status'],
       courseDetail: courseDetail,
       couponCode: json['coupon_code'],
+      modifiedDate: json['modified_date']
     );
   }
 }

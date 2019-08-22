@@ -9,6 +9,7 @@ import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:intl/intl.dart';
 
 class CourseDetailPage extends StatelessWidget {
   final CourseStatus courseStatus;
@@ -48,7 +49,8 @@ class CourseDetailPage extends StatelessWidget {
     myInterstitial.load().catchError((e){
       print(e);
     });
-      
+    final f = new DateFormat('dd-MMM-yyyy hh:mm');
+    var modifiedDate = f.format(DateTime.parse(courseStatus.modifiedDate));
     return Container(
       color: Colors.white,
       child: ListView(
@@ -76,7 +78,8 @@ class CourseDetailPage extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.only(top:8.0, bottom:10.0),
                       child: Text(
-                        "Last Updated " + DateTime.now().toIso8601String(), 
+                        
+                        "Last Updated " + modifiedDate, 
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: Colors.black, fontSize: 13.0, fontWeight: FontWeight.normal,
@@ -91,7 +94,7 @@ class CourseDetailPage extends StatelessWidget {
                   child: const Text('SHOW COUPON', style: TextStyle(fontSize: 20, color: Colors.white)),
                   color: Theme.of(context).accentColor,
                   elevation: 4.0,
-                  splashColor: Colors.blueGrey,
+                  splashColor: Colors.blue,
                   highlightElevation: 8.0,
                   disabledElevation: 0.0,
                   onPressed: () {
@@ -180,27 +183,31 @@ class FeaturedCourse2 extends StatelessWidget {
           Positioned(
             child: Row(children: <Widget> [
               Container(
-                color: Colors.white60.withOpacity(0.8),
+                color: Colors.white60.withOpacity(0.7),
                 child: Text(
                   courseDetail.listingPrice, 
                   style: TextStyle(
                     decoration: TextDecoration.lineThrough,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18.0,
-                    color: Colors.blue,
+                    fontSize: 14.0,
+                    color: Colors.blueGrey,
                   ),
                 ),
               ),
-              Container(
-                color: Colors.white60.withOpacity(0.8),
-                child: Text(
-                  " FREE", 
-                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color:Colors.green),
-                ),
-              )],
+              ],
             ), 
-            right: 10.0,
+            right: 40.0,
             top: 10.0,
+          ),
+          ClipRect(
+            child: Banner(
+              message: "FREE",
+              location: BannerLocation.topEnd,
+              color: Colors.blue,
+              child: Container(
+                height: 60.0,
+              ),
+            ),
           )
         ],
       )
@@ -214,12 +221,16 @@ class FeaturedCourse2 extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
             child: Text(courseDetail.headline),
           ), 
-          CourseInfoHightlight(
-            rating: courseDetail.avgRating, 
-            noOfRatings: courseDetail.numReviews, 
-            price: courseDetail.listingPrice,
-            noOfStudent: courseDetail.numStudents,
-            showPrice: false,),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+            child: CourseInfoHightlight(
+              rating: courseDetail.avgRating, 
+              noOfRatings: courseDetail.numReviews, 
+              price: courseDetail.listingPrice,
+              noOfStudent: courseDetail.numStudents,
+              showPrice: false,),
+          )
+          ,
           Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 6.0)),
         ],
       ),
