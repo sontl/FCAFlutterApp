@@ -188,6 +188,21 @@ class FeaturedCourse extends StatelessWidget {
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16.0),),
             ),
           ),
+          ClipRect(
+            child: Container(
+              width: 90.0,
+              height: 90.0,
+              child: CustomPaint(
+                painter: BannerPainter(
+                  message: "FREE",
+                  textDirection: Directionality.of(context),
+                  layoutDirection: Directionality.of(context),
+                  location: BannerLocation.topStart,
+                  color: Colors.green,
+                ),
+              ),
+            ) 
+          ),
         ],
       )
     ); 
@@ -253,12 +268,8 @@ class MasterHead extends StatelessWidget {
                 color: Colors.blue,
               ),
             ),
-            Text(
-              " FREE", 
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color:Colors.green),
-            )],
-          ), 
-          left: 36.0,
+          ],), 
+          left: 76.0,
           top: 34.0,
         )
       ],
@@ -274,34 +285,45 @@ class CourseInfoListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: EdgeInsets.all(8.0),
-      child: Column(
-        //mainAxisSize: MainAxisSize.max,
-        children: <Widget> [
-          ListTile(
-            title: Text(courseDetail.title),
-            subtitle: Text(courseDetail.headline),
-            leading: Image.network(
-              courseDetail.img96x54Url, width: 90.0,),
-          ),
-          Row (
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(3.0, 0.0, 0.0, 0.0),
-                child: CourseInfoHightlight(
-                  rating: courseDetail.avgRating, 
-                  noOfRatings: courseDetail.numReviews, 
-                  price: courseDetail.listingPrice,
-                  noOfStudent: courseDetail.numStudents,
-                ),
+      child: Stack(
+        children: <Widget>[
+          Column(
+            children: <Widget> [
+              ListTile(
+                title: Text(courseDetail.title),
+                subtitle: Text(courseDetail.headline),
+                leading: Image.network(
+                  courseDetail.img96x54Url, width: 90.0,),
               ),
-            ],
+              Row (
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14.0, 0.0, 0.0, 0.0),
+                    child: CourseInfoHightlight(
+                      rating: courseDetail.avgRating, 
+                      noOfRatings: courseDetail.numReviews, 
+                      price: courseDetail.listingPrice,
+                      noOfStudent: courseDetail.numStudents,
+                    ),
+                  ),
+                ],
+              ),
+            ]
           ),
-          
-        ]
+          ClipRect(
+            child: Banner(
+              message: "FREE",
+              location: BannerLocation.topStart,
+              color: Colors.green,
+              child: Container(
+                height: 60.0,
+                width: 60.0,
+              ),
+            ),
+          )
+        ],
       ),
     );
-    
   }
 }
 
@@ -315,52 +337,50 @@ class CourseInfoHightlight extends StatelessWidget {
   CourseInfoHightlight({ this.rating = .0, this.price, this.noOfRatings=0, this.noOfStudent=0, this.showPrice=true});
   
   Widget build(BuildContext context) {
-    var info = <Widget>[];
-    info.add(Align(
-      alignment: Alignment.bottomLeft,
-      child: FCAStarRating(rating: rating, color: Colors.orangeAccent,))
-    );
-    info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 6.0, 0.0)));
-    info.add(Text(rating.toString(), 
-        style: TextStyle(fontSize: 12.0)));
-    info.add(
-      Text( 
-        " (" + noOfRatings.toString() + " ratings)", 
-        style: TextStyle(fontSize: 12.0)
-      ),
-    );
-    info.add(
-      Text( 
-        "  " + noOfStudent.toString() + " students", 
-        style: TextStyle(fontSize: 12.0)
-      ),
-    );
-    if (showPrice) {
-      info.add(Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 12.0, 0.0)));
-      info.add(
-        Text(
-          price, 
-          style: TextStyle(
-            decoration: TextDecoration.lineThrough,
-            fontWeight: FontWeight.bold,
-            fontSize: 14.0,
+    final deviceWidth = MediaQuery.of(context).size.width;
+    var info = <Widget>[
+      Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Container(
+            width: deviceWidth * 70/100,
+            child: Row(
+              children: <Widget>[
+                Align(
+                  child: FCAStarRating(rating: rating, color: Colors.orangeAccent,)
+                ),
+                Padding(padding: const EdgeInsets.fromLTRB(0.0, 0.0, 6.0, 0.0)),
+                Text(rating.toString(), 
+                    style: TextStyle(fontSize: 12.0)),
+                Text( 
+                  " (" + noOfRatings.toString() + " ratings)", 
+                  style: TextStyle(fontSize: 12.0)
+                ),
+                Text( 
+                  "  " + noOfStudent.toString() + " students", 
+                  style: TextStyle(fontSize: 12.0)
+                ),
+              ],
+            ),
           ),
-        )
-      );
-      info.add(
-        Text(
-          " FREE", 
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15.0,
-            color: Colors.green
+        ],
+      ),
+      Column(
+        children: <Widget>[
+          Text(
+            price, 
+            textAlign: TextAlign.start,
+            style: TextStyle(
+              decoration: TextDecoration.lineThrough,
+              fontWeight: FontWeight.bold,
+              fontSize: 14.0,
+            ),
           ),
-        )
-      );
-    }
+        ],
+      )
+    ];
     
     return Container(
-      width: MediaQuery.of(context).size.width - 20,
       child: Row(
         children: info,          
       )
